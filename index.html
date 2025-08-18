@@ -1676,22 +1676,28 @@
 
         // Update IC rate breakdown
         function updateICBreakdown() {
-            const rawRate = parseFloat(document.getElementById('rawLaborRate').value) || 18.00;
+            const baseRawRate = parseFloat(document.getElementById('rawLaborRate').value) || 18.00;
+            const timeOfService = document.getElementById('timeOfService').value;
+            const timeMultiplier = getTimeMultiplier(timeOfService);
+            
+            // Apply time premium to raw rate FIRST
+            const adjustedRawRate = baseRawRate * timeMultiplier;
+            
             const stateTax = parseFloat(document.getElementById('stateTaxRate').value) || 0.00;
             const icProfitRate = parseFloat(document.getElementById('icProfitRate').value) || 10.0;
             
-            const fica = rawRate * 0.0765;
-            const futa = rawRate * 0.0060;
-            const workComp = rawRate * 0.0250;
-            const gl = rawRate * 0.0050;
-            const stateTaxAmount = rawRate * (stateTax / 100);
+            const fica = adjustedRawRate * 0.0765;
+            const futa = adjustedRawRate * 0.0060;
+            const workComp = adjustedRawRate * 0.0250;
+            const gl = adjustedRawRate * 0.0050;
+            const stateTaxAmount = adjustedRawRate * (stateTax / 100);
             
-            const subTotal = rawRate + fica + futa + workComp + gl + stateTaxAmount;
+            const subTotal = adjustedRawRate + fica + futa + workComp + gl + stateTaxAmount;
             const icProfitAmount = subTotal * (icProfitRate / 100);
             const icLoadedRate = subTotal + icProfitAmount;
             
-            // Update displays
-            document.getElementById('rawRateDisplay').textContent = formatCurrency(rawRate);
+            // Update displays with adjusted raw rate
+            document.getElementById('rawRateDisplay').textContent = formatCurrency(adjustedRawRate);
             document.getElementById('ficaDisplay').textContent = formatCurrency(fica);
             document.getElementById('futaDisplay').textContent = formatCurrency(futa);
             document.getElementById('workCompDisplay').textContent = formatCurrency(workComp);
@@ -1701,6 +1707,9 @@
             document.getElementById('icProfitDisplay').textContent = formatCurrency(icProfitAmount);
             document.getElementById('icLoadedDisplay').textContent = formatCurrency(icLoadedRate);
             
+            console.log('IC Breakdown - Base Raw Rate:', baseRawRate, 'Time Multiplier:', timeMultiplier, 'Adjusted Raw Rate:', adjustedRawRate, 'Final Loaded Rate:', icLoadedRate);
+            
+            // Trigger main calculations update
             updateCalculations();
         }
 
@@ -1714,13 +1723,12 @@
             const restroomCount = parseInt(document.getElementById('restroomCount').value) || 0;
             const drainCount = parseInt(document.getElementById('floorDrainCount').value) || 0;
             const crewSize = parseInt(document.getElementById('crewSize').value) || 2;
-            const timeOfService = document.getElementById('timeOfService').value;
             const margin = parseFloat(document.getElementById('cityWideMargin').value) || 35;
             
-            // Get loaded labor rate
-            const icLoadedRate = getICLoadedRate();
-            const timeMultiplier = getTimeMultiplier(timeOfService);
-            const effectiveRate = icLoadedRate * timeMultiplier;
+            // Get effective rate (already includes time of service premium)
+            const effectiveRate = getICLoadedRate();
+            
+            console.log('Debug - Effective Rate (includes time premium):', effectiveRate);
             
             // Calculate basic cleaning hours
             let totalHours = 0;
@@ -1735,6 +1743,7 @@
                 const frontHours = calculateFrontHouseHours(frontSqFt, restaurantType, crewSize);
                 totalHours += frontHours;
                 frontCost = frontHours * effectiveRate;
+                console.log('Debug - Front Hours:', frontHours, 'Cost:', frontCost);
             }
             
             // Back of house calculation (if included)
@@ -1742,23 +1751,27 @@
                 const backHours = calculateBackHouseHours(backSqFt, restaurantType, crewSize);
                 totalHours += backHours;
                 backCost = backHours * effectiveRate;
+                console.log('Debug - Back Hours:', backHours, 'Cost:', backCost);
             }
             
             // Restroom calculation
             const restroomHours = restroomCount * 0.5 * (crewSize > 1 ? 0.8 : 1.0); // 30 min per restroom, efficiency for crews
             totalHours += restroomHours;
             restroomCost = restroomHours * effectiveRate;
+            console.log('Debug - Restroom Hours:', restroomHours, 'Cost:', restroomCost);
             
             // Floor drain calculation
             const drainHours = drainCount * 0.25 * 4.33; // 15 min per drain weekly, converted to monthly
             totalHours += drainHours;
             drainCost = drainHours * effectiveRate;
+            console.log('Debug - Drain Hours:', drainHours, 'Cost:', drainCost);
             
             basicCost = frontCost + backCost + restroomCost;
             
             // Calculate equipment costs
             const equipmentResults = calculateEquipmentCosts(effectiveRate);
             totalHours += equipmentResults.hours;
+            console.log('Debug - Equipment Hours:', equipmentResults.hours, 'Cost:', equipmentResults.cost);
             
             // Calculate chemical costs
             const chemicalCost = calculateChemicalCosts(totalSqFt, equipmentResults.equipmentCount);
@@ -1767,6 +1780,9 @@
             const totalCostToCW = basicCost + drainCost + equipmentResults.cost + chemicalCost;
             const finalPrice = totalCostToCW / (1 - margin / 100);
             const grossProfit = finalPrice - totalCostToCW;
+            
+            console.log('Debug - Total Cost to CW:', totalCostToCW);
+            console.log('Debug - Final Price:', finalPrice);
             
             // Update results display
             updateResultsDisplay({
@@ -1801,19 +1817,25 @@
             };
         }
 
-        // Get IC loaded rate
+        // Get IC loaded rate (with time of service premium applied to raw rate)
         function getICLoadedRate() {
-            const rawRate = parseFloat(document.getElementById('rawLaborRate').value) || 18.00;
+            const baseRawRate = parseFloat(document.getElementById('rawLaborRate').value) || 18.00;
+            const timeOfService = document.getElementById('timeOfService').value;
+            const timeMultiplier = getTimeMultiplier(timeOfService);
+            
+            // Apply time premium to raw rate FIRST
+            const adjustedRawRate = baseRawRate * timeMultiplier;
+            
             const stateTax = parseFloat(document.getElementById('stateTaxRate').value) || 0.00;
             const icProfitRate = parseFloat(document.getElementById('icProfitRate').value) || 10.0;
             
-            const fica = rawRate * 0.0765;
-            const futa = rawRate * 0.0060;
-            const workComp = rawRate * 0.0250;
-            const gl = rawRate * 0.0050;
-            const stateTaxAmount = rawRate * (stateTax / 100);
+            const fica = adjustedRawRate * 0.0765;
+            const futa = adjustedRawRate * 0.0060;
+            const workComp = adjustedRawRate * 0.0250;
+            const gl = adjustedRawRate * 0.0050;
+            const stateTaxAmount = adjustedRawRate * (stateTax / 100);
             
-            const subTotal = rawRate + fica + futa + workComp + gl + stateTaxAmount;
+            const subTotal = adjustedRawRate + fica + futa + workComp + gl + stateTaxAmount;
             const icProfitAmount = subTotal * (icProfitRate / 100);
             
             return subTotal + icProfitAmount;
@@ -1854,9 +1876,13 @@
             const crewFactor = crewSize > 1 ? 1.4 : 1.0;
             const effectiveRate = baseRate * crewFactor;
             
-            // Convert to monthly hours (daily service * 4.33 weeks)
+            // Convert to monthly hours (daily service)
             const dailyHours = sqFt / effectiveRate;
-            return dailyHours * 30; // Monthly estimate
+            const monthlyHours = dailyHours * 22; // 22 service days per month average
+            
+            console.log('Front House Debug - SqFt:', sqFt, 'Base Rate:', baseRate, 'Crew Factor:', crewFactor, 'Daily Hours:', dailyHours, 'Monthly Hours:', monthlyHours);
+            
+            return monthlyHours;
         }
 
         // Calculate back of house hours
@@ -1884,7 +1910,11 @@
             const effectiveRate = baseRate * crewFactor;
             
             const dailyHours = sqFt / effectiveRate;
-            return dailyHours * 30; // Monthly estimate
+            const monthlyHours = dailyHours * 22; // 22 service days per month average
+            
+            console.log('Back House Debug - SqFt:', sqFt, 'Base Rate:', baseRate, 'Crew Factor:', crewFactor, 'Daily Hours:', dailyHours, 'Monthly Hours:', monthlyHours);
+            
+            return monthlyHours;
         }
 
         // Calculate equipment costs
