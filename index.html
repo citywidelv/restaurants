@@ -1,0 +1,3077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Cleaning Service Pricing Calculator</title>
+    <style>
+        :root {
+            --primary-blue: #1E3A8A;
+            --secondary-blue: #3B82F6;
+            --accent-red: #DC2626;
+            --dark-gray: #374151;
+            --light-gray: #F3F4F6;
+            --success-green: #059669;
+            --white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .cost-provider-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E5E7EB;
+        }
+
+        .cost-provider-section h3 {
+            color: var(--primary-blue);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .toggle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .toggle-group {
+            text-align: center;
+        }
+
+        .toggle-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-gray);
+        }
+
+        .toggle-buttons {
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #E5E7EB;
+        }
+
+        .vendor-btn, .inhouse-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .vendor-btn {
+            background: white;
+            color: var(--accent-red);
+        }
+
+        .vendor-btn.active {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .inhouse-btn {
+            background: white;
+            color: var(--success-green);
+        }
+
+        .inhouse-btn.active {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E5E7EB;
+        }
+
+        .card h3 {
+            color: var(--primary-blue);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .service-toggles {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .service-toggle {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .service-toggle.active {
+            border-color: var(--secondary-blue);
+            background: var(--secondary-blue);
+            color: white;
+        }
+
+        .service-toggle h4 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .service-toggle p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .equipment-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E5E7EB;
+        }
+
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .equipment-item {
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 1.5rem;
+            background: #F9FAFB;
+        }
+
+        .equipment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .equipment-checkbox {
+            margin-right: 0.75rem;
+            transform: scale(1.2);
+        }
+
+        .equipment-title {
+            font-weight: 600;
+            color: var(--primary-blue);
+            font-size: 1.1rem;
+        }
+
+        .equipment-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .equipment-details.hidden {
+            display: none;
+        }
+
+        .frequency-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .frequency-group label {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            color: var(--dark-gray);
+        }
+
+        .frequency-group select,
+        .frequency-group input {
+            padding: 0.5rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .ic-breakdown {
+            background: #F0F9FF;
+            border: 2px solid var(--secondary-blue);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .ic-breakdown h4 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #E0E7FF;
+        }
+
+        .breakdown-total {
+            font-weight: 600;
+            color: var(--primary-blue);
+            border-top: 2px solid var(--secondary-blue);
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .results-section {
+            margin-top: 2rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E5E7EB;
+            text-align: center;
+        }
+
+        .result-card.highlight {
+            border: 2px solid var(--accent-red);
+            box-shadow: 0 6px 12px rgba(220, 38, 38, 0.15);
+        }
+
+        .result-card h4 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .result-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-card.highlight .value {
+            color: var(--accent-red);
+        }
+
+        .result-card .subtitle {
+            font-size: 0.9rem;
+            color: #6B7280;
+        }
+
+        .breakdown-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .breakdown-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E5E7EB;
+        }
+
+        .breakdown-card h4 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .line-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        .line-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .line-item-detail {
+            font-size: 0.85rem;
+            color: #6B7280;
+            margin-left: 1rem;
+        }
+
+        .export-section {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .export-btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .export-btn.vendor {
+            background: var(--secondary-blue);
+            color: white;
+        }
+
+        .export-btn.vendor:hover {
+            background: var(--primary-blue);
+        }
+
+        .export-btn.client {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .export-btn.client:hover {
+            background: #047857;
+        }
+
+        .export-btn.fsm {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .export-btn.fsm:hover {
+            background: #047857;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .toggle-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .equipment-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .service-toggles {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Restaurant Cleaning Service Calculator</h1>
+        <p>Professional Pricing for Front & Back of House Services</p>
+    </div>
+
+    <div class="container">
+        <!-- Cost Provider Toggle System -->
+        <div class="cost-provider-section">
+            <h3>Cost Provider Selection</h3>
+            <div class="toggle-grid">
+                <div class="toggle-group">
+                    <label>Labor</label>
+                    <div class="toggle-buttons">
+                        <button class="vendor-btn active" data-category="labor">Vendor</button>
+                        <button class="inhouse-btn" data-category="labor">In-House</button>
+                    </div>
+                </div>
+                <div class="toggle-group">
+                    <label>Equipment</label>
+                    <div class="toggle-buttons">
+                        <button class="vendor-btn active" data-category="equipment">Vendor</button>
+                        <button class="inhouse-btn" data-category="equipment">In-House</button>
+                    </div>
+                </div>
+                <div class="toggle-group">
+                    <label>Chemicals</label>
+                    <div class="toggle-buttons">
+                        <button class="vendor-btn active" data-category="chemicals">Vendor</button>
+                        <button class="inhouse-btn" data-category="chemicals">In-House</button>
+                    </div>
+                </div>
+                <div class="toggle-group">
+                    <label>Supplies</label>
+                    <div class="toggle-buttons">
+                        <button class="vendor-btn active" data-category="supplies">Vendor</button>
+                        <button class="inhouse-btn" data-category="supplies">In-House</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Project Details -->
+            <div class="card">
+                <h3>Project Details</h3>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="restaurantType">Restaurant Type</label>
+                        <select id="restaurantType" onchange="updateCalculations()">
+                            <option value="qsr">Quick Service (QSR) - Fast food, counter service</option>
+                            <option value="casual">Casual Dining - Table service, moderate pace</option>
+                            <option value="fine">Fine Dining - Full service, high standards</option>
+                            <option value="cafe">Cafe/Bistro - Light meals, coffee service</option>
+                            <option value="sports">Sports Bar/Grill - Bar focus, fried foods</option>
+                            <option value="pizza">Pizza Restaurant - High grease, ovens</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="totalSquareFootage">Total Square Footage</label>
+                        <input type="number" id="totalSquareFootage" value="3500" min="500" max="50000" onchange="updateCalculations()">
+                    </div>
+                    <div class="input-group">
+                        <label for="frontSquareFootage">Front of House Sq Ft</label>
+                        <input type="number" id="frontSquareFootage" value="2100" min="0" onchange="updateCalculations()">
+                    </div>
+                    <div class="input-group">
+                        <label for="backSquareFootage">Back of House Sq Ft</label>
+                        <input type="number" id="backSquareFootage" value="1400" min="0" onchange="updateCalculations()">
+                    </div>
+                    <div class="input-group">
+                        <label for="restroomCount">Number of Restrooms</label>
+                        <input type="number" id="restroomCount" value="2" min="1" max="10" onchange="updateCalculations()">
+                    </div>
+                    <div class="input-group">
+                        <label for="floorDrainCount">Floor Drains (Kitchen)</label>
+                        <input type="number" id="floorDrainCount" value="4" min="0" max="20" onchange="updateCalculations()">
+                    </div>
+                </div>
+
+                <!-- Service Type Selection -->
+                <div class="service-toggles">
+                    <div class="service-toggle active" data-service="both">
+                        <h4>Combined Service</h4>
+                        <p>Front & back of house cleaning</p>
+                    </div>
+                    <div class="service-toggle" data-service="front">
+                        <h4>Front of House Only</h4>
+                        <p>Dining, bar, customer areas</p>
+                    </div>
+                    <div class="service-toggle" data-service="back">
+                        <h4>Back of House Only</h4>
+                        <p>Kitchen, prep, storage areas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vendor Labor & Equipment -->
+            <div class="card">
+                <h3>Vendor Labor & Equipment</h3>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="rawLaborRate">Raw Labor Rate ($/hour)</label>
+                        <input type="number" id="rawLaborRate" value="18.00" step="0.25" min="10" max="50" onchange="updateICBreakdown()">
+                    </div>
+                    <div class="input-group">
+                        <label for="stateTaxRate">State Income Tax (%)</label>
+                        <input type="number" id="stateTaxRate" value="0.00" step="0.25" min="0" max="15" onchange="updateICBreakdown()">
+                    </div>
+                    <div class="input-group">
+                        <label for="icProfitRate">IC Profit & OH (%)</label>
+                        <input type="number" id="icProfitRate" value="10.0" step="0.5" min="5" max="25" onchange="updateICBreakdown()">
+                    </div>
+                    <div class="input-group">
+                        <label for="cityWideMargin">City Wide Margin (%)</label>
+                        <input type="number" id="cityWideMargin" value="35" step="1" min="20" max="50" onchange="updateCalculations()">
+                    </div>
+                    <div class="input-group">
+                        <label for="crewSize">Crew Size</label>
+                        <select id="crewSize" onchange="updateCalculations()">
+                            <option value="1">1 Person</option>
+                            <option value="2" selected>2 People</option>
+                            <option value="3">3 People</option>
+                            <option value="4">4 People</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="timeOfService">Time of Service</label>
+                        <select id="timeOfService" onchange="updateCalculations()">
+                            <option value="normal" selected>Normal Hours</option>
+                            <option value="third">Third Shift (+25%)</option>
+                            <option value="weekend">Weekend (+15%)</option>
+                            <option value="holiday">Holiday (+50%)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- IC Rate Breakdown -->
+                <div class="ic-breakdown">
+                    <h4>Independent Contractor Rate Breakdown</h4>
+                    <div class="breakdown-grid">
+                        <div>
+                            <div class="breakdown-item">
+                                <span>Raw Labor Rate:</span>
+                                <span id="rawRateDisplay">$18.00</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>FICA (7.65%):</span>
+                                <span id="ficaDisplay">$1.38</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>FUTA (0.60%):</span>
+                                <span id="futaDisplay">$0.11</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>Work Comp (2.50%):</span>
+                                <span id="workCompDisplay">$0.45</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>General Liability (0.50%):</span>
+                                <span id="glDisplay">$0.09</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>State Income Tax:</span>
+                                <span id="stateTaxDisplay">$0.00</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>Subtotal:</span>
+                                <span id="subTotalDisplay">$20.03</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>IC Profit (10.0%):</span>
+                                <span id="icProfitDisplay">$2.00</span>
+                            </div>
+                            <div class="breakdown-item breakdown-total">
+                                <span>IC Loaded Rate:</span>
+                                <span id="icLoadedDisplay">$22.03</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kitchen Equipment Inventory -->
+        <div class="equipment-section">
+            <h3>Kitchen Equipment Inventory & Cleaning Schedules</h3>
+            <p style="margin-bottom: 1.5rem; color: #6B7280;">Select equipment present and set individual cleaning frequencies. Each item will be itemized in the final pricing.</p>
+            
+            <div class="equipment-grid">
+                <!-- Deep Fryers -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="fryers" onchange="toggleEquipment('fryers')">
+                        <span class="equipment-title">Deep Fryers</span>
+                    </div>
+                    <div class="equipment-details hidden" id="fryers-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="fryers-qty" value="2" min="1" max="10" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Clean (15 min each)</label>
+                            <select id="fryers-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Boil-Out (45 min each)</label>
+                            <select id="fryers-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Deep Clean (90 min each)</label>
+                            <select id="fryers-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grills/Griddles -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="grills" onchange="toggleEquipment('grills')">
+                        <span class="equipment-title">Grills/Griddles</span>
+                    </div>
+                    <div class="equipment-details hidden" id="grills-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="grills-qty" value="1" min="1" max="10" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Clean (12 min each)</label>
+                            <select id="grills-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (35 min each)</label>
+                            <select id="grills-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Descale (60 min each)</label>
+                            <select id="grills-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ice Machines -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="icemachines" onchange="toggleEquipment('icemachines')">
+                        <span class="equipment-title">Ice Machines</span>
+                    </div>
+                    <div class="equipment-details hidden" id="icemachines-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="icemachines-qty" value="1" min="1" max="5" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Exterior (5 min each)</label>
+                            <select id="icemachines-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="5">5 days/week</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Deep Clean (75 min each)</label>
+                            <select id="icemachines-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.5">Bi-monthly</option>
+                                <option value="0.33">Quarterly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Quarterly Descale (120 min each)</label>
+                            <select id="icemachines-quarterly" onchange="updateCalculations()">
+                                <option value="1">Every Quarter</option>
+                                <option value="0.5">Semi-Annual</option>
+                                <option value="0.33">Annual</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exhaust Hoods -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="hoods" onchange="toggleEquipment('hoods')">
+                        <span class="equipment-title">Exhaust Hoods (NFPA 96)</span>
+                    </div>
+                    <div class="equipment-details hidden" id="hoods-details">
+                        <div class="frequency-group">
+                            <label>Linear Feet</label>
+                            <input type="number" id="hoods-qty" value="12" min="4" max="50" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Volume Type</label>
+                            <select id="hoods-type" onchange="updateCalculations()">
+                                <option value="moderate">Moderate Volume - Semi-Annual</option>
+                                <option value="high">High Volume - Quarterly</option>
+                                <option value="solid">Solid Fuel - Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Hood Cleaning (120 min + $25/LF)</label>
+                            <select id="hoods-frequency" onchange="updateCalculations()">
+                                <option value="0.5">Semi-Annual</option>
+                                <option value="1">Quarterly</option>
+                                <option value="4">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Filter Cleaning (30 min)</label>
+                            <select id="hoods-filters" onchange="updateCalculations()">
+                                <option value="4">Weekly</option>
+                                <option value="2">Bi-weekly</option>
+                                <option value="1">Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dishwashers -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="dishwashers" onchange="toggleEquipment('dishwashers')">
+                        <span class="equipment-title">Commercial Dishwashers</span>
+                    </div>
+                    <div class="equipment-details hidden" id="dishwashers-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="dishwashers-qty" value="1" min="1" max="3" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Clean (8 min each)</label>
+                            <select id="dishwashers-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (45 min each)</label>
+                            <select id="dishwashers-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Delime (90 min each)</label>
+                            <select id="dishwashers-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Walk-in Coolers -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="walkins" onchange="toggleEquipment('walkins')">
+                        <span class="equipment-title">Walk-in Coolers/Freezers</span>
+                    </div>
+                    <div class="equipment-details hidden" id="walkins-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="walkins-qty" value="2" min="1" max="8" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Clean (25 min each)</label>
+                            <select id="walkins-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Deep Clean (120 min each)</label>
+                            <select id="walkins-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0.17">Semi-Annual</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Quarterly Defrost (180 min each)</label>
+                            <select id="walkins-quarterly" onchange="updateCalculations()">
+                                <option value="1">Quarterly</option>
+                                <option value="0.5">Semi-Annual</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prep Tables -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="preptables" onchange="toggleEquipment('preptables')">
+                        <span class="equipment-title">Prep Tables & Work Surfaces</span>
+                    </div>
+                    <div class="equipment-details hidden" id="preptables-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="preptables-qty" value="4" min="1" max="15" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Sanitize (3 min each)</label>
+                            <select id="preptables-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (15 min each)</label>
+                            <select id="preptables-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Polish (8 min each)</label>
+                            <select id="preptables-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coffee/Espresso Equipment -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="coffee" onchange="toggleEquipment('coffee')">
+                        <span class="equipment-title">Coffee/Espresso Equipment</span>
+                    </div>
+                    <div class="equipment-details hidden" id="coffee-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="coffee-qty" value="1" min="1" max="5" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Clean (10 min each)</label>
+                            <select id="coffee-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Descale (45 min each)</label>
+                            <select id="coffee-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Deep Service (90 min each)</label>
+                            <select id="coffee-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ovens (Convection/Deck/Combi) -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="ovens" onchange="toggleEquipment('ovens')">
+                        <span class="equipment-title">Ovens (Convection/Deck/Combi)</span>
+                    </div>
+                    <div class="equipment-details hidden" id="ovens-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="ovens-qty" value="2" min="1" max="8" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Interior Clean (18 min each)</label>
+                            <select id="ovens-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (75 min each)</label>
+                            <select id="ovens-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Delime/Descale (120 min each)</label>
+                            <select id="ovens-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salamanders/Broilers -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="salamanders" onchange="toggleEquipment('salamanders')">
+                        <span class="equipment-title">Salamanders/Broilers</span>
+                    </div>
+                    <div class="equipment-details hidden" id="salamanders-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="salamanders-qty" value="1" min="1" max="4" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Clean (12 min each)</label>
+                            <select id="salamanders-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (45 min each)</label>
+                            <select id="salamanders-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Intensive (90 min each)</label>
+                            <select id="salamanders-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Steam Tables/Hot Wells -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="steamtables" onchange="toggleEquipment('steamtables')">
+                        <span class="equipment-title">Steam Tables/Hot Wells</span>
+                    </div>
+                    <div class="equipment-details hidden" id="steamtables-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="steamtables-qty" value="1" min="1" max="6" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Sanitize (8 min each)</label>
+                            <select id="steamtables-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (35 min each)</label>
+                            <select id="steamtables-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Descale (60 min each)</label>
+                            <select id="steamtables-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ranges/Stovetops -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="ranges" onchange="toggleEquipment('ranges')">
+                        <span class="equipment-title">Ranges/Stovetops</span>
+                    </div>
+                    <div class="equipment-details hidden" id="ranges-details">
+                        <div class="frequency-group">
+                            <label>Burner Count</label>
+                            <input type="number" id="ranges-qty" value="6" min="2" max="20" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Clean (3 min per burner)</label>
+                            <select id="ranges-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (8 min per burner)</label>
+                            <select id="ranges-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Gas Line/Calibration (15 min per burner)</label>
+                            <select id="ranges-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warmers/Heat Lamps -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="warmers" onchange="toggleEquipment('warmers')">
+                        <span class="equipment-title">Warmers/Heat Lamps</span>
+                    </div>
+                    <div class="equipment-details hidden" id="warmers-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="warmers-qty" value="4" min="1" max="12" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Clean (5 min each)</label>
+                            <select id="warmers-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Detail Clean (15 min each)</label>
+                            <select id="warmers-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Bulb/Element Service (25 min each)</label>
+                            <select id="warmers-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slicers/Food Processors -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="slicers" onchange="toggleEquipment('slicers')">
+                        <span class="equipment-title">Slicers/Food Processors</span>
+                    </div>
+                    <div class="equipment-details hidden" id="slicers-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="slicers-qty" value="2" min="1" max="8" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Sanitize (15 min each)</label>
+                            <select id="slicers-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (45 min each)</label>
+                            <select id="slicers-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Blade Service (30 min each)</label>
+                            <select id="slicers-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mixers (Stand/Floor) -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="mixers" onchange="toggleEquipment('mixers')">
+                        <span class="equipment-title">Mixers (Stand/Floor)</span>
+                    </div>
+                    <div class="equipment-details hidden" id="mixers-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="mixers-qty" value="1" min="1" max="5" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Clean (12 min each)</label>
+                            <select id="mixers-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                                <option value="3">3 days/week</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (60 min each)</label>
+                            <select id="mixers-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Lubrication (45 min each)</label>
+                            <select id="mixers-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hood Filters (Separate from Hood Cleaning) -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="hoodfilters" onchange="toggleEquipment('hoodfilters')">
+                        <span class="equipment-title">Hood Filters (Remove & Clean)</span>
+                    </div>
+                    <div class="equipment-details hidden" id="hoodfilters-details">
+                        <div class="frequency-group">
+                            <label>Filter Count</label>
+                            <input type="number" id="hoodfilters-qty" value="8" min="2" max="40" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Remove/Reinstall (5 min per filter)</label>
+                            <select id="hoodfilters-remove" onchange="updateCalculations()">
+                                <option value="4">Weekly</option>
+                                <option value="2">Bi-weekly</option>
+                                <option value="1">Monthly</option>
+                                <option value="0.5">Bi-monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Wash/Degrease (15 min per filter)</label>
+                            <select id="hoodfilters-wash" onchange="updateCalculations()">
+                                <option value="4">Weekly</option>
+                                <option value="2">Bi-weekly</option>
+                                <option value="1">Monthly</option>
+                                <option value="0.5">Bi-monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Deep Degrease (25 min per filter)</label>
+                            <select id="hoodfilters-deep" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0.17">Semi-annual</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kitchen Walls -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="walls" onchange="toggleEquipment('walls')">
+                        <span class="equipment-title">Kitchen Walls</span>
+                    </div>
+                    <div class="equipment-details hidden" id="walls-details">
+                        <div class="frequency-group">
+                            <label>Wall Type</label>
+                            <select id="walls-type" onchange="updateCalculations()">
+                                <option value="stainless">Stainless Steel (15 min/10 LF)</option>
+                                <option value="frp">FRP Panels (10 min/10 LF)</option>
+                                <option value="tile">Ceramic Tile (20 min/10 LF)</option>
+                                <option value="painted">Painted Drywall (8 min/10 LF)</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Linear Feet of Walls</label>
+                            <input type="number" id="walls-qty" value="40" min="10" max="200" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Spot Clean</label>
+                            <select id="walls-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Deep Clean</label>
+                            <select id="walls-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0.17">Semi-annual</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reach-in Refrigerators -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="reachins" onchange="toggleEquipment('reachins')">
+                        <span class="equipment-title">Reach-in Refrigerators</span>
+                    </div>
+                    <div class="equipment-details hidden" id="reachins-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="reachins-qty" value="3" min="1" max="12" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Exterior (5 min each)</label>
+                            <select id="reachins-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="5">5 days/week</option>
+                                <option value="3">3 days/week</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Interior (20 min each)</label>
+                            <select id="reachins-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Coil Clean (45 min each)</label>
+                            <select id="reachins-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Freezers (Upright) -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="freezers" onchange="toggleEquipment('freezers')">
+                        <span class="equipment-title">Upright Freezers</span>
+                    </div>
+                    <div class="equipment-details hidden" id="freezers-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="freezers-qty" value="2" min="1" max="8" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Exterior (8 min each)</label>
+                            <select id="freezers-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Interior/Defrost (60 min each)</label>
+                            <select id="freezers-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.5">Bi-monthly</option>
+                                <option value="0.33">Quarterly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Quarterly Coil Service (90 min each)</label>
+                            <select id="freezers-quarterly" onchange="updateCalculations()">
+                                <option value="1">Quarterly</option>
+                                <option value="0.5">Semi-annual</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Three-Compartment Sinks -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="threesinks" onchange="toggleEquipment('threesinks')">
+                        <span class="equipment-title">Three-Compartment Sinks</span>
+                    </div>
+                    <div class="equipment-details hidden" id="threesinks-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="threesinks-qty" value="1" min="1" max="4" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Sanitize (15 min each)</label>
+                            <select id="threesinks-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (45 min each)</label>
+                            <select id="threesinks-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Drain/Plumbing (30 min each)</label>
+                            <select id="threesinks-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hand Sinks -->
+                <div class="equipment-item">
+                    <div class="equipment-header">
+                        <input type="checkbox" class="equipment-checkbox" id="handsinks" onchange="toggleEquipment('handsinks')">
+                        <span class="equipment-title">Hand Washing Sinks</span>
+                    </div>
+                    <div class="equipment-details hidden" id="handsinks-details">
+                        <div class="frequency-group">
+                            <label>Quantity</label>
+                            <input type="number" id="handsinks-qty" value="2" min="1" max="8" onchange="updateCalculations()">
+                        </div>
+                        <div class="frequency-group">
+                            <label>Daily Sanitize (8 min each)</label>
+                            <select id="handsinks-daily" onchange="updateCalculations()">
+                                <option value="7">7 days/week</option>
+                                <option value="6">6 days/week</option>
+                                <option value="5">5 days/week</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Weekly Deep Clean (20 min each)</label>
+                            <select id="handsinks-weekly" onchange="updateCalculations()">
+                                <option value="1">Weekly</option>
+                                <option value="0.5">Bi-weekly</option>
+                                <option value="0.33">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="frequency-group">
+                            <label>Monthly Faucet/Supply Service (15 min each)</label>
+                            <select id="handsinks-monthly" onchange="updateCalculations()">
+                                <option value="1">Monthly</option>
+                                <option value="0.33">Quarterly</option>
+                                <option value="0">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+            <h3 style="color: var(--primary-blue); margin-bottom: 1.5rem; font-size: 1.8rem; text-align: center;">Pricing Results</h3>
+            
+            <div class="results-grid">
+                <div class="result-card">
+                    <h4>Total Labor Hours</h4>
+                    <div class="value" id="totalHours">0.0</div>
+                    <div class="subtitle">hours per month</div>
+                </div>
+                <div class="result-card">
+                    <h4>Basic Cleaning Cost</h4>
+                    <div class="value" id="basicCleaningCost">$0</div>
+                    <div class="subtitle">Front/back/restrooms</div>
+                </div>
+                <div class="result-card">
+                    <h4>Equipment Cleaning Cost</h4>
+                    <div class="value" id="equipmentCost">$0</div>
+                    <div class="subtitle">All itemized equipment</div>
+                </div>
+                <div class="result-card">
+                    <h4>Floor Drain Cleaning</h4>
+                    <div class="value" id="drainCost">$0</div>
+                    <div class="subtitle">Monthly maintenance</div>
+                </div>
+                <div class="result-card">
+                    <h4>Total Cost to CW</h4>
+                    <div class="value" id="totalCost">$0</div>
+                    <div class="subtitle">Before margin</div>
+                </div>
+                <div class="result-card">
+                    <h4>Chemical & Supply Cost</h4>
+                    <div class="value" id="chemicalCost">$0</div>
+                    <div class="subtitle">Spartan/SC Johnson</div>
+                </div>
+                <div class="result-card highlight">
+                    <h4>Final Client Price</h4>
+                    <div class="value" id="finalPrice">$0</div>
+                    <div class="subtitle">Monthly investment</div>
+                </div>
+                <div class="result-card highlight">
+                    <h4>CW Gross Profit</h4>
+                    <div class="value" id="grossProfit">$0</div>
+                    <div class="subtitle">Monthly margin</div>
+                </div>
+            </div>
+
+            <!-- Detailed Breakdown -->
+            <div class="breakdown-section">
+                <div class="breakdown-card">
+                    <h4>Basic Cleaning Breakdown</h4>
+                    <div id="basicBreakdown">
+                        <div class="line-item">
+                            <span>Front of House Cleaning</span>
+                            <span id="frontHouseDetail">$0</span>
+                        </div>
+                        <div class="line-item">
+                            <span>Back of House Cleaning</span>
+                            <span id="backHouseDetail">$0</span>
+                        </div>
+                        <div class="line-item">
+                            <span>Restroom Cleaning</span>
+                            <span id="restroomDetail">$0</span>
+                        </div>
+                        <div class="line-item">
+                            <span>Floor Drain Maintenance</span>
+                            <span id="drainDetail">$0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="breakdown-card">
+                    <h4>Equipment Cleaning Details</h4>
+                    <div id="equipmentBreakdown">
+                        <!-- Equipment items will be populated here -->
+                    </div>
+                </div>
+
+                <div class="breakdown-card">
+                    <h4>Labor & Cost Analysis</h4>
+                    <div id="costAnalysis">
+                        <div class="line-item">
+                            <span>Total Monthly Labor Hours</span>
+                            <span id="monthlyHours">0.0 hrs</span>
+                        </div>
+                        <div class="line-item">
+                            <span>Average Hourly Rate</span>
+                            <span id="avgHourlyRate">$0.00</span>
+                        </div>
+                        <div class="line-item">
+                            <span>Labor as % of Revenue</span>
+                            <span id="laborPercent">0%</span>
+                        </div>
+                        <div class="line-item">
+                            <span>Chemicals as % of Revenue</span>
+                            <span id="chemicalPercent">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="breakdown-card">
+                    <h4>Service Frequency Summary</h4>
+                    <div id="frequencySummary">
+                        <div class="line-item">
+                            <span>Daily Tasks</span>
+                            <span id="dailyTasks">0 items</span>
+                        </div>
+                        <div class="line-item">
+                            <span>Weekly Tasks</span>
+                            <span id="weeklyTasks">0 items</span>
+                        </div>
+                        <div class="line-item">
+                            <span>Monthly Tasks</span>
+                            <span id="monthlyTasks">0 items</span>
+                        </div>
+                        <div class="line-item">
+                            <span>Quarterly+ Tasks</span>
+                            <span id="quarterlyTasks">0 items</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="export-section">
+            <button class="export-btn vendor" onclick="exportVendorSpecs()">
+                Export Vendor Specifications
+            </button>
+            <button class="export-btn client" onclick="exportClientInstructions()">
+                Export Client Instructions
+            </button>
+            <button class="export-btn fsm" onclick="exportFSMSummary()">
+                Export FSM Job Summary
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let equipmentData = {};
+        let calculationResults = {};
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeToggles();
+            initializeServiceToggles();
+            updateICBreakdown();
+            updateCalculations();
+        });
+
+        // Initialize cost provider toggles
+        function initializeToggles() {
+            document.querySelectorAll('.vendor-btn, .inhouse-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    const isVendor = this.classList.contains('vendor-btn');
+                    
+                    // Update active states
+                    const parent = this.parentElement;
+                    parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    updateCalculations();
+                });
+            });
+        }
+
+        // Initialize service type toggles
+        function initializeServiceToggles() {
+            document.querySelectorAll('.service-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    document.querySelectorAll('.service-toggle').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    updateCalculations();
+                });
+            });
+        }
+
+        // Toggle equipment visibility
+        function toggleEquipment(equipmentId) {
+            const checkbox = document.getElementById(equipmentId);
+            const details = document.getElementById(equipmentId + '-details');
+            
+            if (checkbox.checked) {
+                details.classList.remove('hidden');
+            } else {
+                details.classList.add('hidden');
+            }
+            
+            updateCalculations();
+        }
+
+        // Update IC rate breakdown
+        function updateICBreakdown() {
+            const rawRate = parseFloat(document.getElementById('rawLaborRate').value) || 18.00;
+            const stateTax = parseFloat(document.getElementById('stateTaxRate').value) || 0.00;
+            const icProfitRate = parseFloat(document.getElementById('icProfitRate').value) || 10.0;
+            
+            const fica = rawRate * 0.0765;
+            const futa = rawRate * 0.0060;
+            const workComp = rawRate * 0.0250;
+            const gl = rawRate * 0.0050;
+            const stateTaxAmount = rawRate * (stateTax / 100);
+            
+            const subTotal = rawRate + fica + futa + workComp + gl + stateTaxAmount;
+            const icProfitAmount = subTotal * (icProfitRate / 100);
+            const icLoadedRate = subTotal + icProfitAmount;
+            
+            // Update displays
+            document.getElementById('rawRateDisplay').textContent = formatCurrency(rawRate);
+            document.getElementById('ficaDisplay').textContent = formatCurrency(fica);
+            document.getElementById('futaDisplay').textContent = formatCurrency(futa);
+            document.getElementById('workCompDisplay').textContent = formatCurrency(workComp);
+            document.getElementById('glDisplay').textContent = formatCurrency(gl);
+            document.getElementById('stateTaxDisplay').textContent = formatCurrency(stateTaxAmount);
+            document.getElementById('subTotalDisplay').textContent = formatCurrency(subTotal);
+            document.getElementById('icProfitDisplay').textContent = formatCurrency(icProfitAmount);
+            document.getElementById('icLoadedDisplay').textContent = formatCurrency(icLoadedRate);
+            
+            updateCalculations();
+        }
+
+        // Main calculation function
+        function updateCalculations() {
+            const serviceType = document.querySelector('.service-toggle.active').dataset.service;
+            const restaurantType = document.getElementById('restaurantType').value;
+            const totalSqFt = parseFloat(document.getElementById('totalSquareFootage').value) || 0;
+            const frontSqFt = parseFloat(document.getElementById('frontSquareFootage').value) || 0;
+            const backSqFt = parseFloat(document.getElementById('backSquareFootage').value) || 0;
+            const restroomCount = parseInt(document.getElementById('restroomCount').value) || 0;
+            const drainCount = parseInt(document.getElementById('floorDrainCount').value) || 0;
+            const crewSize = parseInt(document.getElementById('crewSize').value) || 2;
+            const timeOfService = document.getElementById('timeOfService').value;
+            const margin = parseFloat(document.getElementById('cityWideMargin').value) || 35;
+            
+            // Get loaded labor rate
+            const icLoadedRate = getICLoadedRate();
+            const timeMultiplier = getTimeMultiplier(timeOfService);
+            const effectiveRate = icLoadedRate * timeMultiplier;
+            
+            // Calculate basic cleaning hours
+            let totalHours = 0;
+            let basicCost = 0;
+            let frontCost = 0;
+            let backCost = 0;
+            let restroomCost = 0;
+            let drainCost = 0;
+            
+            // Front of house calculation (if included)
+            if (serviceType === 'both' || serviceType === 'front') {
+                const frontHours = calculateFrontHouseHours(frontSqFt, restaurantType, crewSize);
+                totalHours += frontHours;
+                frontCost = frontHours * effectiveRate;
+            }
+            
+            // Back of house calculation (if included)
+            if (serviceType === 'both' || serviceType === 'back') {
+                const backHours = calculateBackHouseHours(backSqFt, restaurantType, crewSize);
+                totalHours += backHours;
+                backCost = backHours * effectiveRate;
+            }
+            
+            // Restroom calculation
+            const restroomHours = restroomCount * 0.5 * (crewSize > 1 ? 0.8 : 1.0); // 30 min per restroom, efficiency for crews
+            totalHours += restroomHours;
+            restroomCost = restroomHours * effectiveRate;
+            
+            // Floor drain calculation
+            const drainHours = drainCount * 0.25 * 4.33; // 15 min per drain weekly, converted to monthly
+            totalHours += drainHours;
+            drainCost = drainHours * effectiveRate;
+            
+            basicCost = frontCost + backCost + restroomCost;
+            
+            // Calculate equipment costs
+            const equipmentResults = calculateEquipmentCosts(effectiveRate);
+            totalHours += equipmentResults.hours;
+            
+            // Calculate chemical costs
+            const chemicalCost = calculateChemicalCosts(totalSqFt, equipmentResults.equipmentCount);
+            
+            // Apply provider logic and margin
+            const totalCostToCW = basicCost + drainCost + equipmentResults.cost + chemicalCost;
+            const finalPrice = totalCostToCW / (1 - margin / 100);
+            const grossProfit = finalPrice - totalCostToCW;
+            
+            // Update results display
+            updateResultsDisplay({
+                totalHours: totalHours,
+                basicCost: basicCost,
+                equipmentCost: equipmentResults.cost,
+                drainCost: drainCost,
+                totalCost: totalCostToCW,
+                chemicalCost: chemicalCost,
+                finalPrice: finalPrice,
+                grossProfit: grossProfit,
+                frontCost: frontCost,
+                backCost: backCost,
+                restroomCost: restroomCost,
+                effectiveRate: effectiveRate
+            });
+            
+            // Update detailed breakdowns
+            updateDetailedBreakdowns(equipmentResults.breakdown);
+            
+            // Store results for export
+            calculationResults = {
+                totalHours: totalHours,
+                basicCost: basicCost,
+                equipmentCost: equipmentResults.cost,
+                drainCost: drainCost,
+                totalCost: totalCostToCW,
+                chemicalCost: chemicalCost,
+                finalPrice: finalPrice,
+                grossProfit: grossProfit,
+                equipmentBreakdown: equipmentResults.breakdown
+            };
+        }
+
+        // Get IC loaded rate
+        function getICLoadedRate() {
+            const rawRate = parseFloat(document.getElementById('rawLaborRate').value) || 18.00;
+            const stateTax = parseFloat(document.getElementById('stateTaxRate').value) || 0.00;
+            const icProfitRate = parseFloat(document.getElementById('icProfitRate').value) || 10.0;
+            
+            const fica = rawRate * 0.0765;
+            const futa = rawRate * 0.0060;
+            const workComp = rawRate * 0.0250;
+            const gl = rawRate * 0.0050;
+            const stateTaxAmount = rawRate * (stateTax / 100);
+            
+            const subTotal = rawRate + fica + futa + workComp + gl + stateTaxAmount;
+            const icProfitAmount = subTotal * (icProfitRate / 100);
+            
+            return subTotal + icProfitAmount;
+        }
+
+        // Get time of service multiplier
+        function getTimeMultiplier(timeOfService) {
+            switch(timeOfService) {
+                case 'third': return 1.25;
+                case 'weekend': return 1.15;
+                case 'holiday': return 1.50;
+                default: return 1.0;
+            }
+        }
+
+        // Calculate front of house hours
+        function calculateFrontHouseHours(sqFt, restaurantType, crewSize) {
+            if (sqFt <= 0) return 0;
+            
+            // Base production rates (sq ft per hour) adjusted for restaurant type
+            let baseRate = 5000; // Conservative base rate
+            
+            switch(restaurantType) {
+                case 'fine':
+                    baseRate = 3500; // More detailed cleaning required
+                    break;
+                case 'sports':
+                    baseRate = 4000; // Heavy traffic, more cleaning
+                    break;
+                case 'qsr':
+                    baseRate = 6000; // Simpler layout, faster cleaning
+                    break;
+                default:
+                    baseRate = 5000;
+            }
+            
+            // Crew efficiency factor
+            const crewFactor = crewSize > 1 ? 1.4 : 1.0;
+            const effectiveRate = baseRate * crewFactor;
+            
+            // Convert to monthly hours (daily service * 4.33 weeks)
+            const dailyHours = sqFt / effectiveRate;
+            return dailyHours * 30; // Monthly estimate
+        }
+
+        // Calculate back of house hours
+        function calculateBackHouseHours(sqFt, restaurantType, crewSize) {
+            if (sqFt <= 0) return 0;
+            
+            // Kitchen areas require more intensive cleaning
+            let baseRate = 2500; // Lower rate = more time per sq ft
+            
+            switch(restaurantType) {
+                case 'pizza':
+                    baseRate = 2000; // Heavy grease, ovens
+                    break;
+                case 'sports':
+                    baseRate = 2200; // Fryers, high volume
+                    break;
+                case 'fine':
+                    baseRate = 2800; // More complex prep, higher standards
+                    break;
+                default:
+                    baseRate = 2500;
+            }
+            
+            const crewFactor = crewSize > 1 ? 1.3 : 1.0;
+            const effectiveRate = baseRate * crewFactor;
+            
+            const dailyHours = sqFt / effectiveRate;
+            return dailyHours * 30; // Monthly estimate
+        }
+
+        // Calculate equipment costs
+        function calculateEquipmentCosts(effectiveRate) {
+            let totalHours = 0;
+            let totalCost = 0;
+            let breakdown = [];
+            let equipmentCount = 0;
+            
+            // Deep Fryers
+            if (document.getElementById('fryers').checked) {
+                const qty = parseInt(document.getElementById('fryers-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('fryers-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('fryers-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('fryers-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.25 * 4.33) + (weekly * 0.75 * 4.33) + (monthly * 1.5));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Deep Fryers (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk daily, ${weekly}/wk boil-out, ${monthly}/mo deep`
+                    });
+                }
+            }
+            
+            // Grills/Griddles
+            if (document.getElementById('grills').checked) {
+                const qty = parseInt(document.getElementById('grills-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('grills-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('grills-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('grills-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.2 * 4.33) + (weekly * 0.58 * 4.33) + (monthly * 1.0));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Grills/Griddles (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk daily, ${weekly}/wk deep, ${monthly}/mo descale`
+                    });
+                }
+            }
+            
+            // Ice Machines
+            if (document.getElementById('icemachines').checked) {
+                const qty = parseInt(document.getElementById('icemachines-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('icemachines-daily').value) || 0;
+                const monthly = parseFloat(document.getElementById('icemachines-monthly').value) || 0;
+                const quarterly = parseFloat(document.getElementById('icemachines-quarterly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.083 * 4.33) + (monthly * 1.25) + (quarterly * 2.0 * 0.33));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Ice Machines (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk daily, ${monthly}/mo deep, ${quarterly}/qtr descale`
+                    });
+                }
+            }
+            
+            // Exhaust Hoods
+            if (document.getElementById('hoods').checked) {
+                const linearFeet = parseInt(document.getElementById('hoods-qty').value) || 0;
+                const frequency = parseFloat(document.getElementById('hoods-frequency').value) || 0;
+                const filters = parseFloat(document.getElementById('hoods-filters').value) || 0;
+                
+                const hoodHours = (2.0 + linearFeet * 0.25) * frequency; // 2 hrs base + 15 min per LF
+                const filterHours = 0.5 * filters * 4.33; // 30 min per filter cleaning
+                const monthlyHours = hoodHours + filterHours;
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += 1;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Exhaust Hoods (${linearFeet} LF)`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${frequency}/mo hood, ${filters}/mo filters`
+                    });
+                }
+            }
+            
+            // Dishwashers
+            if (document.getElementById('dishwashers').checked) {
+                const qty = parseInt(document.getElementById('dishwashers-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('dishwashers-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('dishwashers-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('dishwashers-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.133 * 4.33) + (weekly * 0.75 * 4.33) + (monthly * 1.5));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Dishwashers (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk daily, ${weekly}/wk deep, ${monthly}/mo delime`
+                    });
+                }
+            }
+            
+            // Walk-in Coolers
+            if (document.getElementById('walkins').checked) {
+                const qty = parseInt(document.getElementById('walkins-qty').value) || 0;
+                const weekly = parseFloat(document.getElementById('walkins-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('walkins-monthly').value) || 0;
+                const quarterly = parseFloat(document.getElementById('walkins-quarterly').value) || 0;
+                
+                const monthlyHours = qty * ((weekly * 0.42 * 4.33) + (monthly * 2.0) + (quarterly * 3.0 * 0.33));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Walk-in Coolers (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${weekly}/wk clean, ${monthly}/mo deep, ${quarterly}/qtr defrost`
+                    });
+                }
+            }
+            
+            // Prep Tables
+            if (document.getElementById('preptables').checked) {
+                const qty = parseInt(document.getElementById('preptables-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('preptables-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('preptables-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('preptables-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.05 * 4.33) + (weekly * 0.25 * 4.33) + (monthly * 0.133));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Prep Tables (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk sanitize, ${weekly}/wk deep, ${monthly}/mo polish`
+                    });
+                }
+            }
+            
+            // Coffee Equipment
+            if (document.getElementById('coffee').checked) {
+                const qty = parseInt(document.getElementById('coffee-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('coffee-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('coffee-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('coffee-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.167 * 4.33) + (weekly * 0.75 * 4.33) + (monthly * 1.5));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Coffee Equipment (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk daily, ${weekly}/wk descale, ${monthly}/mo service`
+                    });
+                }
+            }
+            
+            // Ovens
+            if (document.getElementById('ovens').checked) {
+                const qty = parseInt(document.getElementById('ovens-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('ovens-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('ovens-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('ovens-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.3 * 4.33) + (weekly * 1.25 * 4.33) + (monthly * 2.0));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Ovens (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk daily, ${weekly}/wk deep, ${monthly}/mo delime`
+                    });
+                }
+            }
+            
+            // Salamanders
+            if (document.getElementById('salamanders').checked) {
+                const qty = parseInt(document.getElementById('salamanders-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('salamanders-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('salamanders-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('salamanders-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.2 * 4.33) + (weekly * 0.75 * 4.33) + (monthly * 1.5));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Salamanders (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk daily, ${weekly}/wk deep, ${monthly}/mo intensive`
+                    });
+                }
+            }
+            
+            // Steam Tables
+            if (document.getElementById('steamtables').checked) {
+                const qty = parseInt(document.getElementById('steamtables-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('steamtables-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('steamtables-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('steamtables-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.133 * 4.33) + (weekly * 0.583 * 4.33) + (monthly * 1.0));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Steam Tables (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk sanitize, ${weekly}/wk deep, ${monthly}/mo descale`
+                    });
+                }
+            }
+            
+            // Ranges
+            if (document.getElementById('ranges').checked) {
+                const qty = parseInt(document.getElementById('ranges-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('ranges-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('ranges-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('ranges-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.05 * 4.33) + (weekly * 0.133 * 4.33) + (monthly * 0.25));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Range Burners (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk daily, ${weekly}/wk deep, ${monthly}/mo service`
+                    });
+                }
+            }
+            
+            // Warmers
+            if (document.getElementById('warmers').checked) {
+                const qty = parseInt(document.getElementById('warmers-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('warmers-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('warmers-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('warmers-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.083 * 4.33) + (weekly * 0.25 * 4.33) + (monthly * 0.417));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Warmers/Heat Lamps (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk daily, ${weekly}/wk detail, ${monthly}/mo service`
+                    });
+                }
+            }
+            
+            // Slicers
+            if (document.getElementById('slicers').checked) {
+                const qty = parseInt(document.getElementById('slicers-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('slicers-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('slicers-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('slicers-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.25 * 4.33) + (weekly * 0.75 * 4.33) + (monthly * 0.5));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Slicers/Processors (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk sanitize, ${weekly}/wk deep, ${monthly}/mo blade service`
+                    });
+                }
+            }
+            
+            // Mixers
+            if (document.getElementById('mixers').checked) {
+                const qty = parseInt(document.getElementById('mixers-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('mixers-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('mixers-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('mixers-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.2 * 4.33) + (weekly * 1.0 * 4.33) + (monthly * 0.75));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Mixers (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk clean, ${weekly}/wk deep, ${monthly}/mo lubrication`
+                    });
+                }
+            }
+            
+            // Hood Filters
+            if (document.getElementById('hoodfilters').checked) {
+                const qty = parseInt(document.getElementById('hoodfilters-qty').value) || 0;
+                const remove = parseFloat(document.getElementById('hoodfilters-remove').value) || 0;
+                const wash = parseFloat(document.getElementById('hoodfilters-wash').value) || 0;
+                const deep = parseFloat(document.getElementById('hoodfilters-deep').value) || 0;
+                
+                const monthlyHours = qty * ((remove * 0.083 * 4.33) + (wash * 0.25 * 4.33) + (deep * 0.417));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += 1;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Hood Filters (${qty} filters)`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${remove}/mo remove, ${wash}/mo wash, ${deep}/mo deep`
+                    });
+                }
+            }
+            
+            // Kitchen Walls
+            if (document.getElementById('walls').checked) {
+                const linearFeet = parseInt(document.getElementById('walls-qty').value) || 0;
+                const wallType = document.getElementById('walls-type').value;
+                const weekly = parseFloat(document.getElementById('walls-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('walls-monthly').value) || 0;
+                
+                // Time per 10 linear feet based on wall type
+                let timePerSection = 0.167; // 10 minutes for FRP (default)
+                let typeName = 'FRP Panels';
+                
+                switch(wallType) {
+                    case 'stainless':
+                        timePerSection = 0.25; // 15 minutes per 10 LF
+                        typeName = 'Stainless Steel';
+                        break;
+                    case 'frp':
+                        timePerSection = 0.167; // 10 minutes per 10 LF
+                        typeName = 'FRP Panels';
+                        break;
+                    case 'tile':
+                        timePerSection = 0.333; // 20 minutes per 10 LF
+                        typeName = 'Ceramic Tile';
+                        break;
+                    case 'painted':
+                        timePerSection = 0.133; // 8 minutes per 10 LF
+                        typeName = 'Painted Drywall';
+                        break;
+                }
+                
+                const sections = Math.ceil(linearFeet / 10);
+                const monthlyHours = sections * ((weekly * timePerSection * 4.33) + (monthly * timePerSection * 2));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += 1;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Kitchen Walls (${linearFeet} LF ${typeName})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${weekly}/mo spot clean, ${monthly}/mo deep clean`
+                    });
+                }
+            }
+            
+            // Reach-in Refrigerators
+            if (document.getElementById('reachins').checked) {
+                const qty = parseInt(document.getElementById('reachins-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('reachins-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('reachins-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('reachins-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.083 * 4.33) + (weekly * 0.333 * 4.33) + (monthly * 0.75));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Reach-in Refrigerators (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk exterior, ${weekly}/wk interior, ${monthly}/mo coils`
+                    });
+                }
+            }
+            
+            // Upright Freezers
+            if (document.getElementById('freezers').checked) {
+                const qty = parseInt(document.getElementById('freezers-qty').value) || 0;
+                const weekly = parseFloat(document.getElementById('freezers-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('freezers-monthly').value) || 0;
+                const quarterly = parseFloat(document.getElementById('freezers-quarterly').value) || 0;
+                
+                const monthlyHours = qty * ((weekly * 0.133 * 4.33) + (monthly * 1.0) + (quarterly * 1.5 * 0.33));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Upright Freezers (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${weekly}/wk exterior, ${monthly}/mo defrost, ${quarterly}/qtr coils`
+                    });
+                }
+            }
+            
+            // Three-Compartment Sinks
+            if (document.getElementById('threesinks').checked) {
+                const qty = parseInt(document.getElementById('threesinks-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('threesinks-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('threesinks-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('threesinks-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.25 * 4.33) + (weekly * 0.75 * 4.33) + (monthly * 0.5));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Three-Compartment Sinks (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk sanitize, ${weekly}/wk deep, ${monthly}/mo plumbing`
+                    });
+                }
+            }
+            
+            // Hand Sinks
+            if (document.getElementById('handsinks').checked) {
+                const qty = parseInt(document.getElementById('handsinks-qty').value) || 0;
+                const daily = parseFloat(document.getElementById('handsinks-daily').value) || 0;
+                const weekly = parseFloat(document.getElementById('handsinks-weekly').value) || 0;
+                const monthly = parseFloat(document.getElementById('handsinks-monthly').value) || 0;
+                
+                const monthlyHours = qty * ((daily * 0.133 * 4.33) + (weekly * 0.333 * 4.33) + (monthly * 0.25));
+                const cost = monthlyHours * effectiveRate;
+                
+                totalHours += monthlyHours;
+                totalCost += cost;
+                equipmentCount += qty;
+                
+                if (monthlyHours > 0) {
+                    breakdown.push({
+                        name: `Hand Washing Sinks (${qty})`,
+                        hours: monthlyHours,
+                        cost: cost,
+                        details: `${daily}/wk sanitize, ${weekly}/wk deep, ${monthly}/mo faucet service`
+                    });
+                }
+            }
+            
+            return {
+                hours: totalHours,
+                cost: totalCost,
+                breakdown: breakdown,
+                equipmentCount: equipmentCount
+            };
+        }
+
+        // Calculate chemical costs
+        function calculateChemicalCosts(totalSqFt, equipmentCount) {
+            // Base chemical cost per sq ft (Spartan/SC Johnson products)
+            const baseChemicalRate = 0.08; // $0.08 per sq ft monthly
+            
+            // Equipment-specific chemical additions
+            const equipmentChemicalCost = equipmentCount * 15; // $15 per piece of equipment monthly
+            
+            const totalChemicalCost = (totalSqFt * baseChemicalRate) + equipmentChemicalCost;
+            
+            return totalChemicalCost;
+        }
+
+        // Update results display
+        function updateResultsDisplay(results) {
+            document.getElementById('totalHours').textContent = results.totalHours.toFixed(1);
+            document.getElementById('basicCleaningCost').textContent = formatCurrency(results.basicCost);
+            document.getElementById('equipmentCost').textContent = formatCurrency(results.equipmentCost);
+            document.getElementById('drainCost').textContent = formatCurrency(results.drainCost);
+            document.getElementById('totalCost').textContent = formatCurrency(results.totalCost);
+            document.getElementById('chemicalCost').textContent = formatCurrency(results.chemicalCost);
+            document.getElementById('finalPrice').textContent = formatCurrency(results.finalPrice);
+            document.getElementById('grossProfit').textContent = formatCurrency(results.grossProfit);
+            
+            // Update detailed breakdown
+            document.getElementById('frontHouseDetail').textContent = formatCurrency(results.frontCost);
+            document.getElementById('backHouseDetail').textContent = formatCurrency(results.backCost);
+            document.getElementById('restroomDetail').textContent = formatCurrency(results.restroomCost);
+            document.getElementById('drainDetail').textContent = formatCurrency(results.drainCost);
+            
+            // Update cost analysis
+            document.getElementById('monthlyHours').textContent = results.totalHours.toFixed(1) + ' hrs';
+            document.getElementById('avgHourlyRate').textContent = formatCurrency(results.effectiveRate);
+            
+            const laborPercent = ((results.basicCost + results.equipmentCost + results.drainCost) / results.finalPrice * 100).toFixed(1);
+            const chemicalPercent = (results.chemicalCost / results.finalPrice * 100).toFixed(1);
+            
+            document.getElementById('laborPercent').textContent = laborPercent + '%';
+            document.getElementById('chemicalPercent').textContent = chemicalPercent + '%';
+        }
+
+        // Update detailed breakdowns
+        function updateDetailedBreakdowns(equipmentBreakdown) {
+            const equipmentBreakdownDiv = document.getElementById('equipmentBreakdown');
+            equipmentBreakdownDiv.innerHTML = '';
+            
+            if (equipmentBreakdown.length === 0) {
+                equipmentBreakdownDiv.innerHTML = '<div class="line-item"><span>No equipment selected</span><span>$0</span></div>';
+            } else {
+                equipmentBreakdown.forEach(item => {
+                    const lineItem = document.createElement('div');
+                    lineItem.className = 'line-item';
+                    lineItem.innerHTML = `
+                        <div>
+                            <span>${item.name}</span>
+                            <div class="line-item-detail">${item.details} - ${item.hours.toFixed(1)} hrs/mo</div>
+                        </div>
+                        <span>${formatCurrency(item.cost)}</span>
+                    `;
+                    equipmentBreakdownDiv.appendChild(lineItem);
+                });
+            }
+            
+            // Update frequency summary
+            updateFrequencySummary(equipmentBreakdown);
+        }
+
+        // Update frequency summary
+        function updateFrequencySummary(equipmentBreakdown) {
+            let dailyCount = 0;
+            let weeklyCount = 0;
+            let monthlyCount = 0;
+            let quarterlyCount = 0;
+            
+            // Count basic cleaning tasks
+            const serviceType = document.querySelector('.service-toggle.active').dataset.service;
+            if (serviceType === 'both' || serviceType === 'front') dailyCount++;
+            if (serviceType === 'both' || serviceType === 'back') dailyCount++;
+            dailyCount++; // Restrooms
+            
+            weeklyCount++; // Floor drains
+            
+            // Count equipment tasks
+            equipmentBreakdown.forEach(item => {
+                if (item.details.includes('daily') || item.details.includes('/wk')) dailyCount++;
+                if (item.details.includes('weekly') || item.details.includes('/wk')) weeklyCount++;
+                if (item.details.includes('monthly') || item.details.includes('/mo')) monthlyCount++;
+                if (item.details.includes('quarterly') || item.details.includes('/qtr')) quarterlyCount++;
+            });
+            
+            document.getElementById('dailyTasks').textContent = dailyCount + ' items';
+            document.getElementById('weeklyTasks').textContent = weeklyCount + ' items';
+            document.getElementById('monthlyTasks').textContent = monthlyCount + ' items';
+            document.getElementById('quarterlyTasks').textContent = quarterlyCount + ' items';
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            if (isNaN(amount) || amount === null || amount === undefined) {
+                return '$0';
+            }
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(Math.round(amount));
+        }
+
+        // Export vendor specifications
+        function exportVendorSpecs() {
+            const results = calculationResults;
+            const serviceType = document.querySelector('.service-toggle.active').dataset.service;
+            const restaurantType = document.getElementById('restaurantType').value;
+            
+            let rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}
+\\f0\\fs24
+
+\\b RESTAURANT CLEANING SERVICE - VENDOR SPECIFICATIONS\\b0\\par
+\\par
+Generated: ${new Date().toLocaleDateString()}\\par
+Service Type: ${getServiceTypeName(serviceType)}\\par
+Restaurant Type: ${getRestaurantTypeName(restaurantType)}\\par
+\\par
+
+\\b SCOPE OF WORK:\\b0\\par
+`;
+
+            // Add basic cleaning specifications
+            if (serviceType === 'both' || serviceType === 'front') {
+                rtfContent += `\\par
+\\b Front of House Cleaning:\\b0\\par
+- Daily cleaning of dining areas, bar, host station\\par
+- Floor cleaning (sweep, mop, spot clean)\\par
+- Table and chair sanitization\\par
+- Window and mirror cleaning\\par
+- Trash removal and liner replacement\\par
+- Light fixture cleaning\\par
+`;
+            }
+
+            if (serviceType === 'both' || serviceType === 'back') {
+                rtfContent += `\\par
+\\b Back of House Cleaning:\\b0\\par
+- Kitchen floor cleaning and sanitization\\par
+- Food prep area cleaning\\par
+- Storage area maintenance\\par
+- Employee break area cleaning\\par
+- Waste removal and area sanitization\\par
+`;
+            }
+
+            rtfContent += `\\par
+\\b Restroom Cleaning:\\b0\\par
+- Complete fixture cleaning and sanitization\\par
+- Floor cleaning and disinfection\\par
+- Mirror and partition cleaning\\par
+- Supply restocking\\par
+- Trash removal\\par
+\\par
+
+\\b Floor Drain Maintenance:\\b0\\par
+- Weekly inspection and cleaning\\par
+- Debris removal and hot water flush\\par
+- Enzyme treatment application\\par
+- Grease buildup prevention\\par
+`;
+
+            // Add equipment specifications
+            if (results.equipmentBreakdown && results.equipmentBreakdown.length > 0) {
+                rtfContent += `\\par
+\\b EQUIPMENT CLEANING SPECIFICATIONS:\\b0\\par
+`;
+                
+                results.equipmentBreakdown.forEach(item => {
+                    rtfContent += `\\par
+\\b ${item.name}:\\b0\\par
+- Service Details: ${item.details}\\par
+- Monthly Labor Allocation: ${item.hours.toFixed(1)} hours\\par
+`;
+                });
+            }
+
+            rtfContent += `\\par
+\\b CHEMICAL SPECIFICATIONS:\\b0\\par
+- Spartan Chemical products for kitchen areas\\par
+- SC Johnson Professional products for front of house\\par
+- Food-safe sanitizers and degreasers\\par
+- EPA-registered disinfectants\\par
+- Proper dilution ratios per manufacturer specifications\\par
+\\par
+
+\\b QUALITY STANDARDS:\\b0\\par
+- ServSafe compliance for all food contact surfaces\\par
+- NFPA 96 compliance for hood cleaning (where applicable)\\par
+- Health department regulation adherence\\par
+- Documentation of cleaning schedules and chemical concentrations\\par
+- Before/after photo documentation for equipment cleaning\\par
+\\par
+
+\\b LABOR REQUIREMENTS:\\b0\\par
+- Total Monthly Hours: ${results.totalHours.toFixed(1)}\\par
+- Crew Size: ${document.getElementById('crewSize').value} person(s)\\par
+- Service Time: ${getTimeOfServiceName()}\\par
+- Estimated Cost: ${formatCurrency(results.totalCost)}\\par
+}`;
+
+            downloadRTF(rtfContent, 'restaurant-cleaning-vendor-specifications.rtf');
+        }
+
+        // Export client instructions
+        function exportClientInstructions() {
+            const results = calculationResults;
+            const serviceType = document.querySelector('.service-toggle.active').dataset.service;
+            const restaurantType = document.getElementById('restaurantType').value;
+            
+            let rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}
+\\f0\\fs24
+
+\\b RESTAURANT CLEANING SERVICE - CLIENT INSTRUCTIONS\\b0\\par
+\\par
+Generated: ${new Date().toLocaleDateString()}\\par
+Monthly Investment: ${formatCurrency(results.finalPrice)}\\par
+\\par
+
+\\b SERVICE OVERVIEW:\\b0\\par
+Your restaurant cleaning service includes comprehensive maintenance designed to ensure health code compliance, food safety, and professional appearance. Our trained technicians follow ServSafe protocols and use commercial-grade, food-safe cleaning products.\\par
+\\par
+
+\\b WHAT'S INCLUDED:\\b0\\par
+`;
+
+            if (serviceType === 'both' || serviceType === 'front') {
+                rtfContent += `\\par
+\\b Front of House Service:\\b0\\par
+- Daily cleaning of all customer areas\\par
+- Table, chair, and booth sanitization\\par
+- Floor care (sweeping, mopping, spot cleaning)\\par
+- Restroom cleaning and supply maintenance\\par
+- Window and mirror cleaning\\par
+- Trash removal and fresh liner installation\\par
+`;
+            }
+
+            if (serviceType === 'both' || serviceType === 'back') {
+                rtfContent += `\\par
+\\b Back of House Service:\\b0\\par
+- Kitchen floor cleaning and sanitization\\par
+- Food preparation area maintenance\\par
+- Storage and dry goods area cleaning\\par
+- Employee break room cleaning\\par
+- Floor drain maintenance and odor control\\par
+`;
+            }
+
+            if (results.equipmentBreakdown && results.equipmentBreakdown.length > 0) {
+                rtfContent += `\\par
+\\b Equipment Cleaning Service:\\b0\\par
+`;
+                
+                results.equipmentBreakdown.forEach(item => {
+                    rtfContent += `- ${item.name}: ${item.details}\\par
+`;
+                });
+            }
+
+            rtfContent += `\\par
+\\b PREPARATION REQUIREMENTS:\\b0\\par
+\\par
+To ensure efficient service and best results, please:\\par
+\\par
+- Clear all tables and chairs in dining areas\\par
+- Remove items from kitchen counters and prep surfaces\\par
+- Ensure equipment is cool and safe to clean\\par
+- Secure or remove any valuable or fragile items\\par
+- Provide access to all areas requiring service\\par
+- Ensure adequate lighting in all service areas\\par
+\\par
+
+\\b SCHEDULING AND ACCESS:\\b0\\par
+\\par
+- Service will be performed during agreed hours\\par
+- A responsible staff member should be present during first service\\par
+- Keys or access codes will be secured per company policy\\par
+- 24-hour notice required for schedule changes\\par
+- Emergency cleaning available with premium pricing\\par
+\\par
+
+\\b POST-SERVICE PROCEDURES:\\b0\\par
+\\par
+After each cleaning service:\\par
+- Areas will be left clean, sanitized, and ready for operation\\par
+- All cleaning supplies and equipment will be removed\\par
+- Service completion report will be left for management review\\par
+- Any issues or concerns will be documented and reported\\par
+- Next service date and any special requirements will be noted\\par
+\\par
+
+\\b HEALTH CODE COMPLIANCE:\\b0\\par
+\\par
+Our service is designed to support your health department compliance:\\par
+- All chemicals are food-safe and EPA-registered\\par
+- Cleaning schedules follow local health department requirements\\par
+- Documentation provided for health inspection preparation\\par
+- Staff trained in current food safety regulations\\par
+- Special attention to critical control points\\par
+\\par
+
+\\b QUALITY ASSURANCE:\\b0\\par
+\\par
+We guarantee professional results through:\\par
+- Trained and insured cleaning technicians\\par
+- Regular quality inspections\\par
+- Customer feedback programs\\par
+- 24-hour response to service concerns\\par
+- Continuous staff training and certification updates\\par
+\\par
+
+\\b BILLING AND SERVICE ADJUSTMENTS:\\b0\\par
+\\par
+Monthly Investment: ${formatCurrency(results.finalPrice)}\\par
+Payment terms: Net 30 days\\par
+Service adjustments available with 7-day notice\\par
+Additional services available upon request\\par
+\\par
+
+\\b CONTACT INFORMATION:\\b0\\par
+\\par
+For service questions or concerns:\\par
+- Primary Contact: Your City Wide Account Manager\\par
+- Emergency Line: Available 24/7\\par
+- Email: service@citywide.com\\par
+- Quality Assurance: qa@citywide.com\\par
+}`;
+
+            downloadRTF(rtfContent, 'restaurant-cleaning-client-instructions.rtf');
+        }
+
+        // Export FSM Job Summary
+        function exportFSMSummary() {
+            const results = calculationResults;
+            const serviceType = document.querySelector('.service-toggle.active').dataset.service;
+            const restaurantType = document.getElementById('restaurantType').value;
+            const totalSqFt = parseFloat(document.getElementById('totalSquareFootage').value) || 0;
+            const frontSqFt = parseFloat(document.getElementById('frontSquareFootage').value) || 0;
+            const backSqFt = parseFloat(document.getElementById('backSquareFootage').value) || 0;
+            const restroomCount = parseInt(document.getElementById('restroomCount').value) || 0;
+            const drainCount = parseInt(document.getElementById('floorDrainCount').value) || 0;
+            
+            let rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}
+\\f0\\fs24
+
+\\b FACILITY SOLUTIONS MANAGER - COMPLETE JOB SUMMARY\\b0\\par
+\\par
+Generated: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}\\par
+Service Type: ${getServiceTypeName(serviceType)}\\par
+Restaurant Type: ${getRestaurantTypeName(restaurantType)}\\par
+Total Square Footage: ${totalSqFt.toLocaleString()} sq ft\\par
+\\par
+
+\\b JOB OVERVIEW:\\b0\\par
+\\par
+This comprehensive restaurant cleaning service covers all aspects of food service facility maintenance, from daily operational cleaning to specialized equipment service. The scope includes front-of-house customer areas, back-of-house kitchen operations, restroom facilities, and detailed equipment cleaning protocols.\\par
+\\par
+Facility Details:\\par
+- Front of House: ${frontSqFt.toLocaleString()} sq ft\\par
+- Back of House: ${backSqFt.toLocaleString()} sq ft\\par
+- Restrooms: ${restroomCount} facilities\\par
+- Floor Drains: ${drainCount} kitchen drains\\par
+- Total Monthly Labor: ${results.totalHours.toFixed(1)} hours\\par
+- Crew Size: ${document.getElementById('crewSize').value} person(s)\\par
+\\par
+
+\\b PRICING SUMMARY:\\b0\\par
+\\par
+Final Client Price: ${formatCurrency(results.finalPrice)} per month\\par
+Total Vendor Payment: ${formatCurrency(results.totalCost)} per month\\par
+City Wide Gross Profit: ${formatCurrency(results.grossProfit)} per month\\par
+City Wide Margin: ${document.getElementById('cityWideMargin').value}%\\par
+Price per Square Foot: ${formatCurrencyDetailed(results.finalPrice / totalSqFt)} per sq ft\\par
+\\par
+
+\\b VENDOR PAYMENT STRUCTURE:\\b0\\par
+\\par
+Cost Provider Selections:\\par
+- Labor: ${document.querySelector('[data-category="labor"] .active').textContent}\\par
+- Equipment: ${document.querySelector('[data-category="equipment"] .active').textContent}\\par
+- Chemicals: ${document.querySelector('[data-category="chemicals"] .active').textContent}\\par
+- Supplies: ${document.querySelector('[data-category="supplies"] .active').textContent}\\par
+\\par
+Labor Rate Structure:\\par
+- Raw Labor Rate: ${formatCurrency(parseFloat(document.getElementById('rawLaborRate').value))} per hour\\par
+- IC Loaded Rate: ${formatCurrency(getICLoadedRate())} per hour\\par
+- Time of Service: ${getTimeOfServiceName()}\\par
+- Effective Billing Rate: ${formatCurrency(getICLoadedRate() * getTimeMultiplier(document.getElementById('timeOfService').value))} per hour\\par
+\\par
+
+\\b SITE CONDITIONS & CHALLENGES:\\b0\\par
+\\par
+Restaurant Type Considerations:\\par
+${getRestaurantTypeDetails(restaurantType)}\\par
+\\par
+Access and Logistics:\\par
+- Service Schedule: ${getTimeOfServiceName()}\\par
+- Crew Size Requirements: ${document.getElementById('crewSize').value} person team for optimal efficiency\\par
+- Special Equipment: Professional kitchen cleaning chemicals and equipment required\\par
+- Safety Considerations: Food-safe cleaning products, NFPA compliance for hood work\\par
+\\par
+
+\\b VENDOR QUESTIONS TO ASK:\\b0\\par
+\\par
+During vendor qualification, verify the following capabilities:\\par
+\\par
+1. Do you have experience cleaning commercial kitchens and restaurants?\\par
+2. Are your staff trained in ServSafe protocols and food safety regulations?\\par
+3. Do you carry proper insurance including general liability and workers compensation?\\par
+4. Can you provide NFPA 96 certified hood cleaning technicians (if applicable)?\\par
+5. Do you have access to commercial-grade kitchen degreasers and food-safe sanitizers?\\par
+6. Can you accommodate ${getTimeOfServiceName().toLowerCase()} scheduling requirements?\\par
+7. Do you have experience with the specific equipment types selected for this facility?\\par
+8. Can you provide documentation and reporting for health department compliance?\\par
+\\par
+
+\\b CLIENT COMMUNICATION POINTS:\\b0\\par
+\\par
+Preparation Requirements:\\par
+- Clear all equipment surfaces and prep areas before service\\par
+- Ensure hot equipment is cool and safe for cleaning\\par
+- Provide access to all areas requiring service\\par
+- Secure valuable items and fragile equipment\\par
+\\par
+Service Process Expectations:\\par
+- All work performed during agreed service hours\\par
+- Food-safe chemicals used throughout facility\\par
+- Cleaning completion documented with service reports\\par
+- Any issues or concerns reported immediately\\par
+\\par
+Post-Service Care Instructions:\\par
+- Allow proper drying time before equipment use\\par
+- Review service completion checklist\\par
+- Maintain cleaning schedules between professional services\\par
+- Contact service provider for any concerns within 24 hours\\par
+\\par
+
+\\b SCHEDULING CONSIDERATIONS:\\b0\\par
+\\par
+Optimal Service Timing:\\par
+- Kitchen equipment cleaning best performed when cool\\par
+- Hood and filter cleaning may require kitchen shutdown\\par
+- Floor drain service requires water access and drainage time\\par
+- Deep equipment cleaning may need extended service windows\\par
+\\par
+Frequency Coordination:\\par
+- Daily tasks integrated with restaurant operations\\par
+- Weekly deep cleaning scheduled during low-traffic periods\\par
+- Monthly equipment service coordinated with maintenance schedules\\par
+- Quarterly tasks planned around business cycles\\par
+\\par
+Weather and Seasonal Factors:\\par
+- Increased service needs during high-volume seasons\\par
+- Winter heating considerations for chemical effectiveness\\par
+- Summer humidity impacts on drying times\\par
+- Holiday schedules require advance coordination\\par
+\\par
+
+\\b QUALITY ASSURANCE CHECKLIST:\\b0\\par
+\\par
+Service Completion Verification:\\par
+[ ] All equipment cleaned per manufacturer specifications\\par
+[ ] Food contact surfaces properly sanitized\\par
+[ ] Chemical concentrations documented and verified\\par
+[ ] Floor drains clear and odor-free\\par
+[ ] Hood filters clean and properly reinstalled\\par
+[ ] All tools and supplies removed from premises\\par
+[ ] Service areas left clean and ready for operation\\par
+[ ] Completion documentation signed and dated\\par
+\\par
+Client Approval Points:\\par
+[ ] Walk-through completed with management\\par
+[ ] Any deficiencies noted and corrected\\par
+[ ] Service schedule confirmed for next visit\\par
+[ ] Special requests or concerns documented\\par
+[ ] Invoice and service report provided\\par
+\\par
+
+\\b PROFITABILITY ANALYSIS:\\b0\\par
+\\par
+Revenue Breakdown:\\par
+Client Monthly Payment: ${formatCurrency(results.finalPrice)}\\par
+Less: Vendor Payment: ${formatCurrency(results.totalCost)}\\par
+Equals: City Wide Profit: ${formatCurrency(results.grossProfit)}\\par
+\\par
+Key Performance Metrics:\\par
+- Gross Margin: ${((results.grossProfit / results.finalPrice) * 100).toFixed(1)}%\\par
+- Revenue per Hour: ${formatCurrency(results.finalPrice / results.totalHours)}\\par
+- Labor Cost Ratio: ${((results.basicCost + results.equipmentCost + results.drainCost) / results.finalPrice * 100).toFixed(1)}%\\par
+- Chemical Cost Ratio: ${(results.chemicalCost / results.finalPrice * 100).toFixed(1)}%\\par
+\\par
+Efficiency Targets:\\par
+- Service completion within allocated hours\\par
+- Quality scores above 95% on client evaluations\\par
+- Zero health code violations attributed to cleaning\\par
+- Equipment longevity improved through proper maintenance\\par
+\\par
+Risk Factors and Mitigation:\\par
+- Food safety compliance critical - ensure vendor training\\par
+- Equipment damage liability - verify vendor insurance\\par
+- Chemical safety - confirm food-safe product use\\par
+- Schedule disruption - maintain backup vendor relationships\\par
+\\par
+
+\\b EQUIPMENT-SPECIFIC CONSIDERATIONS:\\b0\\par
+\\par`;
+
+            // Add equipment breakdown if any equipment is selected
+            if (results.equipmentBreakdown && results.equipmentBreakdown.length > 0) {
+                rtfContent += `Selected Equipment Service Details:\\par
+`;
+                results.equipmentBreakdown.forEach(item => {
+                    rtfContent += `\\par
+${item.name}:\\par
+- Service Schedule: ${item.details}\\par
+- Monthly Labor: ${item.hours.toFixed(1)} hours\\par
+- Monthly Cost: ${formatCurrency(item.cost)}\\par
+`;
+                });
+            }
+
+            rtfContent += `\\par
+\\b LOCAL MARKET FACTORS:\\b0\\par
+\\par
+Regional Considerations:\\par
+- Labor rates reflect local market conditions\\par
+- Chemical costs include regional supplier pricing\\par
+- Health department requirements vary by jurisdiction\\par
+- Competitor pricing analyzed for market positioning\\par
+\\par
+Service Excellence Standards:\\par
+- Exceed basic health code requirements\\par
+- Proactive equipment maintenance approach\\par
+- Responsive customer service and communication\\par
+- Continuous staff training and certification updates\\par
+\\par
+
+\\b SUCCESS METRICS AND FOLLOW-UP:\\b0\\par
+\\par
+Monthly Performance Review:\\par
+- Service completion rates and timing\\par
+- Quality scores and client feedback\\par
+- Cost control and margin maintenance\\par
+- Equipment condition and longevity tracking\\par
+\\par
+Quarterly Business Review:\\par
+- Service scope optimization opportunities\\par
+- Equipment additions or modifications\\par
+- Frequency adjustments based on usage patterns\\par
+- Cost benchmarking against market rates\\par
+\\par
+This comprehensive job summary provides all necessary information for successful restaurant cleaning service delivery, vendor management, and client satisfaction while maintaining target profitability margins.\\par
+}`;
+
+            downloadRTF(rtfContent, 'fsm-restaurant-cleaning-job-summary.rtf');
+        }
+
+        // Helper function for detailed currency formatting
+        function formatCurrencyDetailed(amount) {
+            if (isNaN(amount) || amount === null || amount === undefined) {
+                return '$0.00';
+            }
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        // Helper function for restaurant type details
+        function getRestaurantTypeDetails(restaurantType) {
+            switch(restaurantType) {
+                case 'qsr':
+                    return '- High-volume, fast-paced environment with frequent cleaning needs\\par- Focus on speed and efficiency in service delivery\\par- Heavy grease loads from fryers and quick-cooking equipment';
+                case 'casual':
+                    return '- Moderate volume with varied menu requiring diverse equipment cleaning\\par- Balance of speed and thoroughness in service approach\\par- Standard grease loads with mixed cooking methods';
+                case 'fine':
+                    return '- Low volume, high standards requiring meticulous attention to detail\\par- Extended service windows acceptable for thorough cleaning\\par- Complex equipment requiring specialized cleaning protocols';
+                case 'cafe':
+                    return '- Light food prep with emphasis on coffee equipment and pastry areas\\par- Minimal grease but high standards for customer-visible areas\\par- Focus on espresso machines and display case cleaning';
+                case 'sports':
+                    return '- High-volume fryer use creating heavy grease loads\\par- Extended hours requiring flexible service scheduling\\par- Focus on kitchen exhaust and grease management systems';
+                case 'pizza':
+                    return '- Extremely heavy grease loads from pizza ovens and prep areas\\par- Specialized attention to oven cleaning and exhaust systems\\par- Flour dust management in addition to standard kitchen cleaning';
+                default:
+                    return '- Standard commercial kitchen cleaning requirements\\par- Typical equipment mix and cleaning frequencies\\par- Moderate grease loads and standard service expectations';
+            }
+        }
+
+        // Helper functions for export
+        function getServiceTypeName(serviceType) {
+            switch(serviceType) {
+                case 'both': return 'Combined Front & Back of House';
+                case 'front': return 'Front of House Only';
+                case 'back': return 'Back of House Only';
+                default: return 'Combined Service';
+            }
+        }
+
+        function getRestaurantTypeName(restaurantType) {
+            switch(restaurantType) {
+                case 'qsr': return 'Quick Service Restaurant';
+                case 'casual': return 'Casual Dining';
+                case 'fine': return 'Fine Dining';
+                case 'cafe': return 'Cafe/Bistro';
+                case 'sports': return 'Sports Bar/Grill';
+                case 'pizza': return 'Pizza Restaurant';
+                default: return 'Restaurant';
+            }
+        }
+
+        function getTimeOfServiceName() {
+            const timeOfService = document.getElementById('timeOfService').value;
+            switch(timeOfService) {
+                case 'third': return 'Third Shift (+25% premium)';
+                case 'weekend': return 'Weekend Service (+15% premium)';
+                case 'holiday': return 'Holiday Service (+50% premium)';
+                default: return 'Normal Business Hours';
+            }
+        }
+
+        // Download RTF file
+        function downloadRTF(content, filename) {
+            const blob = new Blob([content], { type: 'application/rtf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
