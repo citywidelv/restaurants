@@ -557,6 +557,18 @@
                         <label for="floorDrainCount">Floor Drains (Kitchen)</label>
                         <input type="number" id="floorDrainCount" value="4" min="0" max="20" onchange="updateCalculations()">
                     </div>
+                    <div class="input-group">
+                        <label for="cleaningFrequency">Basic Cleaning Frequency</label>
+                        <select id="cleaningFrequency" onchange="updateCalculations()">
+                            <option value="7">7 days per week</option>
+                            <option value="6">6 days per week</option>
+                            <option value="5">5 days per week</option>
+                            <option value="4">4 days per week</option>
+                            <option value="3">3 days per week</option>
+                            <option value="2">2 days per week</option>
+                            <option value="1">1 day per week</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Service Type Selection -->
@@ -644,6 +656,10 @@
                             <div class="breakdown-item">
                                 <span>State Income Tax:</span>
                                 <span id="stateTaxDisplay">$0.00</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>Chemicals/Equipment (10%):</span>
+                                <span id="chemEquipDisplay">$1.80</span>
                             </div>
                             <div class="breakdown-item">
                                 <span>Subtotal:</span>
@@ -1628,8 +1644,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeToggles();
             initializeServiceToggles();
-            updateICBreakdown();
-            updateCalculations();
+            // Wait a bit for DOM to be fully ready, then update calculations
+            setTimeout(() => {
+                updateICBreakdown();
+            }, 100);
         });
 
         // Initialize cost provider toggles
@@ -1692,7 +1710,20 @@
             const gl = adjustedRawRate * 0.0050;
             const stateTaxAmount = adjustedRawRate * (stateTax / 100);
             
-            const subTotal = adjustedRawRate + fica + futa + workComp + gl + stateTaxAmount;
+            // Add 10% for chemicals and equipment if vendor provided (with error checking)
+            let chemEquipRate = 0;
+            try {
+                const chemicalsBtn = document.querySelector('[data-category="chemicals"] .vendor-btn');
+                const equipmentBtn = document.querySelector('[data-category="equipment"] .vendor-btn');
+                const chemicalsVendor = chemicalsBtn && chemicalsBtn.classList.contains('active');
+                const equipmentVendor = equipmentBtn && equipmentBtn.classList.contains('active');
+                chemEquipRate = (chemicalsVendor || equipmentVendor) ? adjustedRawRate * 0.10 : 0;
+            } catch (e) {
+                console.log('Provider toggles not ready, defaulting to vendor rates');
+                chemEquipRate = adjustedRawRate * 0.10; // Default to vendor
+            }
+            
+            const subTotal = adjustedRawRate + fica + futa + workComp + gl + stateTaxAmount + chemEquipRate;
             const icProfitAmount = subTotal * (icProfitRate / 100);
             const icLoadedRate = subTotal + icProfitAmount;
             
@@ -1703,11 +1734,12 @@
             document.getElementById('workCompDisplay').textContent = formatCurrency(workComp);
             document.getElementById('glDisplay').textContent = formatCurrency(gl);
             document.getElementById('stateTaxDisplay').textContent = formatCurrency(stateTaxAmount);
+            document.getElementById('chemEquipDisplay').textContent = formatCurrency(chemEquipRate);
             document.getElementById('subTotalDisplay').textContent = formatCurrency(subTotal);
             document.getElementById('icProfitDisplay').textContent = formatCurrency(icProfitAmount);
             document.getElementById('icLoadedDisplay').textContent = formatCurrency(icLoadedRate);
             
-            console.log('IC Breakdown - Base Raw Rate:', baseRawRate, 'Time Multiplier:', timeMultiplier, 'Adjusted Raw Rate:', adjustedRawRate, 'Final Loaded Rate:', icLoadedRate);
+            console.log('IC Breakdown - Base Raw Rate:', baseRawRate, 'Time Multiplier:', timeMultiplier, 'Adjusted Raw Rate:', adjustedRawRate, 'Chem/Equip Rate:', chemEquipRate, 'Final Loaded Rate:', icLoadedRate);
             
             // Trigger main calculations update
             updateCalculations();
@@ -1835,7 +1867,20 @@
             const gl = adjustedRawRate * 0.0050;
             const stateTaxAmount = adjustedRawRate * (stateTax / 100);
             
-            const subTotal = adjustedRawRate + fica + futa + workComp + gl + stateTaxAmount;
+            // Add 10% for chemicals and equipment if vendor provided (with error checking)
+            let chemEquipRate = 0;
+            try {
+                const chemicalsBtn = document.querySelector('[data-category="chemicals"] .vendor-btn');
+                const equipmentBtn = document.querySelector('[data-category="equipment"] .vendor-btn');
+                const chemicalsVendor = chemicalsBtn && chemicalsBtn.classList.contains('active');
+                const equipmentVendor = equipmentBtn && equipmentBtn.classList.contains('active');
+                chemEquipRate = (chemicalsVendor || equipmentVendor) ? adjustedRawRate * 0.10 : 0;
+            } catch (e) {
+                console.log('Provider toggles not ready, defaulting to vendor rates');
+                chemEquipRate = adjustedRawRate * 0.10; // Default to vendor
+            }
+            
+            const subTotal = adjustedRawRate + fica + futa + workComp + gl + stateTaxAmount + chemEquipRate;
             const icProfitAmount = subTotal * (icProfitRate / 100);
             
             return subTotal + icProfitAmount;
@@ -1854,6 +1899,8 @@
         // Calculate front of house hours
         function calculateFrontHouseHours(sqFt, restaurantType, crewSize) {
             if (sqFt <= 0) return 0;
+            
+            const cleaningFrequency = parseInt(document.getElementById('cleaningFrequency').value) || 7;
             
             // Base production rates (sq ft per hour) adjusted for restaurant type
             let baseRate = 5000; // Conservative base rate
@@ -1876,11 +1923,11 @@
             const crewFactor = crewSize > 1 ? 1.4 : 1.0;
             const effectiveRate = baseRate * crewFactor;
             
-            // Convert to monthly hours (daily service)
+            // Calculate daily hours, then multiply by frequency and weeks per month
             const dailyHours = sqFt / effectiveRate;
-            const monthlyHours = dailyHours * 22; // 22 service days per month average
+            const monthlyHours = dailyHours * cleaningFrequency * 4.33; // frequency × 4.33 weeks per month
             
-            console.log('Front House Debug - SqFt:', sqFt, 'Base Rate:', baseRate, 'Crew Factor:', crewFactor, 'Daily Hours:', dailyHours, 'Monthly Hours:', monthlyHours);
+            console.log('Front House Debug - SqFt:', sqFt, 'Frequency:', cleaningFrequency, 'Base Rate:', baseRate, 'Crew Factor:', crewFactor, 'Daily Hours:', dailyHours, 'Monthly Hours:', monthlyHours);
             
             return monthlyHours;
         }
@@ -1888,6 +1935,8 @@
         // Calculate back of house hours
         function calculateBackHouseHours(sqFt, restaurantType, crewSize) {
             if (sqFt <= 0) return 0;
+            
+            const cleaningFrequency = parseInt(document.getElementById('cleaningFrequency').value) || 7;
             
             // Kitchen areas require more intensive cleaning
             let baseRate = 2500; // Lower rate = more time per sq ft
@@ -1910,9 +1959,9 @@
             const effectiveRate = baseRate * crewFactor;
             
             const dailyHours = sqFt / effectiveRate;
-            const monthlyHours = dailyHours * 22; // 22 service days per month average
+            const monthlyHours = dailyHours * cleaningFrequency * 4.33; // frequency × 4.33 weeks per month
             
-            console.log('Back House Debug - SqFt:', sqFt, 'Base Rate:', baseRate, 'Crew Factor:', crewFactor, 'Daily Hours:', dailyHours, 'Monthly Hours:', monthlyHours);
+            console.log('Back House Debug - SqFt:', sqFt, 'Frequency:', cleaningFrequency, 'Base Rate:', baseRate, 'Crew Factor:', crewFactor, 'Daily Hours:', dailyHours, 'Monthly Hours:', monthlyHours);
             
             return monthlyHours;
         }
