@@ -165,6 +165,7 @@ body{
     <div class="hdr-actions">
       <button class="hdr-btn" id="userBtn" onclick="changeUser()">Set Your Name</button>
       <button class="hdr-btn" onclick="openSaves()">Saved Work</button>
+      <button class="hdr-btn" onclick="resetAll()">Clear All Fields</button>
     </div>
   </div>
   <div class="tabs">
@@ -276,12 +277,13 @@ function money2(n){return '$'+n.toFixed(2)}
 
 /* ---------- REGIONS. Kitchen wages from the Bid Calculator Rates for Service (Nevada Kitchen $16.50, Reno $18.50, TRIC $20.50, AZ $17.50)
    cross-checked against 2026 market: LV kitchen steward avg $15.69 with Culinary 226 pulling comp toward $28+; Reno cleaners avg $17.31. ---------- */
+/* July 29, 2026 pay policy update: technician wages raised - techs $25+/hr, difficult floor work $30/hr, supervisors default $35/hr (editable per service). */
 const REGIONS={
-  lv:   {label:'Las Vegas',          wage:16.50, mult:1.00, note:'Kitchen-rate labor. The Culinary union pulls experienced kitchen workers toward $28+/hr casino jobs: pay kitchen rates or lose the crew mid-contract. SNHD letter grades make cleanliness a public scoreboard: sell that.'},
-  reno: {label:'Reno / Sparks',      wage:18.50, mult:1.08, note:'Kitchen rate runs $2 over LV and the crew pool is thin. Fewer certified hood subs up north: lock the relationship early, and the markup room is better.'},
-  carson:{label:'Carson City',       wage:18.50, mult:1.08, note:'Same band as Reno. Washoe and Carson health districts inspect differently than SNHD: no letter grade cards, same cleanliness demerits.'},
-  tric: {label:'TRIC / USA Parkway', wage:20.50, mult:1.15, note:'Industrial cafeterias and food production. Badging, deadhead, zero on-corridor crews: hold the premium.'},
-  az:   {label:'Arizona Border',     wage:17.50, mult:1.05, note:'Laughlin and the river towns run casino kitchens too. Thin vendor supply: price like a travel market.'}
+  lv:   {label:'Las Vegas',          wage:25.00, mult:1.00, note:'Kitchen-rate labor. The Culinary union pulls experienced kitchen workers toward $28+/hr casino jobs: pay kitchen rates or lose the crew mid-contract. SNHD letter grades make cleanliness a public scoreboard: sell that.'},
+  reno: {label:'Reno / Sparks',      wage:27.00, mult:1.08, note:'Kitchen rate runs $2 over LV and the crew pool is thin. Fewer certified hood subs up north: lock the relationship early, and the markup room is better.'},
+  carson:{label:'Carson City',       wage:27.00, mult:1.08, note:'Same band as Reno. Washoe and Carson health districts inspect differently than SNHD: no letter grade cards, same cleanliness demerits.'},
+  tric: {label:'TRIC / USA Parkway', wage:29.00, mult:1.15, note:'Industrial cafeterias and food production. Badging, deadhead, zero on-corridor crews: hold the premium.'},
+  az:   {label:'Arizona Border',     wage:26.00, mult:1.05, note:'Laughlin and the river towns run casino kitchens too. Thin vendor supply: price like a travel market.'}
 };
 
 /* ---------- CHEMICALS & SUPPLIES (2026 street prices). perUnit = $ per SF, visit, unit, or system. ---------- */
@@ -357,6 +359,7 @@ const CONDITIONS=[{k:'good',label:'Maintained Kitchen',lab:0.9,chem:0.9},{k:'hea
 const FREQS=[[1,'One-time'],[4,'Quarterly'],[6,'Every other month'],[12,'Monthly'],[26,'Bi-weekly'],[52,'Weekly']];
 const NIGHTLY_FREQS=[[3,'3 nights / week'],[4,'4 nights / week'],[5,'5 nights / week'],[6,'6 nights / week'],[7,'7 nights / week']];
 
+const SUP_WAGE=35;      /* working supervisor default $/hr, editable on every service */
 const BURDEN=0.15; const INCIDENTALS=0.04; const IC_MARGIN=0.08; const VENDOR_CHEM_MARKUP=0.15; const MIN_PRICE=150;
 function autoMargin(sf){ if(sf<1000)return 40; if(sf<2500)return 38; if(sf<5000)return 36; if(sf<10000)return 34; if(sf<25000)return 33; return 32; }
 
@@ -380,6 +383,7 @@ let S={svcOn:{}, inputs:{}, user:localStorage.getItem('cwrest_user')||''};
 let CHEMS=JSON.parse(JSON.stringify(DEFAULT_CHEMS));
 try{const saved=localStorage.getItem('cwrest_chems'); if(saved){const p=JSON.parse(saved); Object.keys(CHEMS).forEach(k=>{if(p[k]&&typeof p[k].perUnit==='number')CHEMS[k].perUnit=p[k].perUnit;});}}catch(e){}
 function setSvc(id,field,val){if(!S.inputs[id])S.inputs[id]={};S.inputs[id][field]=val;recalc();autosaveSoon();}
+function autoCrew(s,st){const q=parseFloat(st&&st.sf)||0;return s.crew1?1:(q>6000?3:2);}
 
 /* ---------- PRICING ENGINE (Bid Calculator Step 1b chain) ---------- */
 function priceService(s){
@@ -395,10 +399,16 @@ function priceService(s){
 
   let manHrs=isUnit? qty/s.perHr*cond.lab : qty/s.rate*cond.lab;
   manHrs=Math.max(manHrs,1);
-  const crew=s.crew1?1:(qty>6000?3:2);
+  const crewOv=parseInt(st.crew);
+  const crew=(!isNaN(crewOv)&&crewOv>0)?crewOv:autoCrew(s,st);
   const clockHrs=manHrs/crew;
   const wage=parseFloat(st.wage)||region.wage*(s.wageAdj||1);
-  const laborCost=manHrs*wage*(1+BURDEN);
+  const techLabor=manHrs*wage*(1+BURDEN);
+  const supN=Math.max(0,parseInt(st.sup)||0);
+  const supWage=parseFloat(st.supWage)||SUP_WAGE;
+  const supHrs=supN*clockHrs;
+  const supCost=supHrs*supWage*(1+BURDEN);
+  const laborCost=techLabor+supCost;
   const incCost=laborCost*INCIDENTALS;
 
   let chems=[]; let chemCost=0;
@@ -432,7 +442,7 @@ function priceService(s){
 
   const mktArr=isUnit?s.mktUnit:s.mkt;
   const mktLow=mktArr[0]*region.mult, mktHigh=mktArr[1]*region.mult;
-  return {s,sf:qty,isUnit,cond,events,perWeek,manHrs,crew,clockHrs,wage,laborCost,incCost,chems,chemCost,cwChems,vendorChems,equipCost,flatCost,vendorBase,vendorCost,inhouse,totalCost,margin,price,perSF:(price-flatCost)/qty,mktLow,mktHigh};
+  return {s,sf:qty,isUnit,cond,events,perWeek,manHrs,crew,clockHrs,wage,laborCost,techLabor,supN,supWage,supHrs,supCost,incCost,chems,chemCost,cwChems,vendorChems,equipCost,flatCost,vendorBase,vendorCost,inhouse,totalCost,margin,price,perSF:(price-flatCost)/qty,mktLow,mktHigh};
 }
 function activeResults(){return SERVICES.filter(s=>!s.group&&S.svcOn[s.id]).map(priceService).filter(Boolean);}
 function applyMinimums(results){
@@ -469,6 +479,9 @@ function renderServices(){
       +'<div class="field"><label>'+qtyLabel+'</label><input type="number" value="'+(st.sf||'')+'" placeholder="'+(s.unit?'e.g. '+(s.unit==='hours'?'24':'4'):'e.g. 3000')+'" onchange="setSvc(\''+s.id+'\',\'sf\',this.value)"><small>'+(s.qtyHelp||'')+'</small></div>'
       +'<div class="field"><label>Grease &amp; Soil Level</label><select onchange="setSvc(\''+s.id+'\',\'cond\',this.value)">'+CONDITIONS.map(c=>'<option value="'+c.k+'"'+((st.cond||'heavy')===c.k?' selected':'')+'>'+c.label+'</option>').join('')+'</select><small>Grade what you saw on the walk. First cleans of neglected kitchens run 50% slower and nearly double the chemical.</small></div>'
       +'<div class="field"><label>'+(s.freqPerWeek?'Nights per Week':'Visits / Year')+'</label><select onchange="setSvc(\''+s.id+'\',\'events\',this.value)">'+freqList.map(f=>'<option value="'+f[0]+'"'+((parseFloat(st.events)||freqDefault)===f[0]?' selected':'')+'>'+f[1]+'</option>').join('')+'</select><small>'+(s.freqPerWeek?'The summary converts this to the monthly contract number.':'')+'</small></div>'
+      +'<div class="field"><label>Techs on This Job</label><input type="number" min="1" step="1" value="'+(st.crew||'')+'" placeholder="auto: '+autoCrew(s,st)+'" onchange="setSvc(\''+s.id+'\',\'crew\',this.value)"><small>Crew members working this line. Auto-sized from the job. Type over it when the method sets the crew (auto scrubber work always runs 2).</small></div>'
+      +'<div class="field"><label>Supervisors on Site</label><input type="number" min="0" step="1" value="'+(st.sup||'')+'" placeholder="0" onchange="setSvc(\''+s.id+'\',\'sup\',this.value)"><small>On-site supervisor billed for the full visit. Leave 0 for none.</small></div>'
+      +'<div class="field"><label>Supervisor $/hr</label><input type="number" step="0.5" value="'+(st.supWage||'')+'" placeholder="'+SUP_WAGE.toFixed(2)+'" onchange="setSvc(\''+s.id+'\',\'supWage\',this.value)"></div>'
       +'<div class="field"><label>Crew Wage $/hr (kitchen rate)</label><input type="number" step="0.5" value="'+(st.wage||'')+'" placeholder="'+(REGIONS[$('region').value].wage*(s.wageAdj||1)).toFixed(2)+'" onchange="setSvc(\''+s.id+'\',\'wage\',this.value)"><small>Kitchen work pays above office janitorial. Underpay and the casino stewarding jobs take your crew.</small></div>'
       +'<div class="field"><label>Equipment $/hr</label><input type="number" step="1" value="'+(st.equip||'')+'" placeholder="'+s.equip+'" onchange="setSvc(\''+s.id+'\',\'equip\',this.value)"></div>'
       +'<div class="field"><label>'+(s.unit?'Price per '+s.unit.replace(/s$/,'')+' Override':'Rate/SF Override')+'</label><input type="number" step="0.01" value="'+(st.rateOv||'')+'" placeholder="auto build-up" onchange="setSvc(\''+s.id+'\',\'rateOv\',this.value)"><small>Bypasses the build-up when you hold a firm sub quote or account history.</small></div>'
@@ -478,7 +491,8 @@ function renderServices(){
         const uw=s.unit?('/'+s.unit.replace(/s$/,'')):'/SF';
         const flag=r.perSF>=r.mktLow&&r.perSF<=r.mktHigh?'<span class="mktflag ok">inside market range</span>':(r.perSF<r.mktLow?'<span class="mktflag warn">below market, room to hold price</span>':'<span class="mktflag warn">above market, check inputs or expect pushback</span>');
         body+='<div class="buildup">'
-        +'<div class="bl"><span>Crew labor: '+r.manHrs.toFixed(1)+' labor-hrs ('+r.crew+' crew x '+r.clockHrs.toFixed(1)+' hrs) @ $'+r.wage.toFixed(2)+' + '+(BURDEN*100)+'% payroll burden</span><b>'+money(r.laborCost)+'</b></div>'
+        +'<div class="bl"><span>Crew labor: '+r.manHrs.toFixed(1)+' labor-hrs ('+r.crew+' crew x '+r.clockHrs.toFixed(1)+' hrs) @ $'+r.wage.toFixed(2)+' + '+(BURDEN*100)+'% payroll burden</span><b>'+money(r.techLabor)+'</b></div>'
+        +(r.supN?'<div class="bl"><span>Supervisor: '+r.supN+' x '+r.clockHrs.toFixed(1)+' hrs @ $'+r.supWage.toFixed(2)+' + '+(BURDEN*100)+'% burden</span><b>'+money(r.supCost)+'</b></div>':'')
         +'<div class="bl"><span>Incidentals &amp; unlisted supplies ('+(INCIDENTALS*100)+'% of labor)</span><b>'+money(r.incCost)+'</b></div>'
         +r.chems.map(c=>'<div class="bl"><span>'+c.label+' ('+money2(c.perUnit)+uw+')</span><b>'+money(c.cost)+'</b></div>').join('')
         +'<div class="bl"><span>Equipment fee ('+r.clockHrs.toFixed(1)+' hrs @ $'+((st.equip)||s.equip)+'/hr)</span><b>'+money(r.equipCost)+'</b></div>'
@@ -690,7 +704,8 @@ function printQuote(internal){
     +(r.perWeek?'<p><b>Monthly: '+money(r.finalPrice*r.perWeek*4.33)+'</b></p>':(r.events>1?'<p><b>Annual: '+money(r.finalPrice*r.events)+' ('+money(r.finalPrice*r.events/12)+'/month)</b></p>':''));
     if(internal){
       h+='<table class="p-table"><tr><th>Cost Line</th><th>Amount</th></tr>'
-      +'<tr><td>Crew labor '+r.manHrs.toFixed(1)+' labor-hrs @ $'+r.wage.toFixed(2)+' +'+(BURDEN*100)+'% burden</td><td>'+money(r.laborCost)+'</td></tr>'
+      +'<tr><td>Crew labor '+r.manHrs.toFixed(1)+' labor-hrs @ $'+r.wage.toFixed(2)+' +'+(BURDEN*100)+'% burden</td><td>'+money(r.techLabor)+'</td></tr>'
+      +(r.supN?'<tr><td>Supervisor '+r.supHrs.toFixed(1)+' hrs @ $'+r.supWage.toFixed(2)+' +'+(BURDEN*100)+'% burden</td><td>'+money(r.supCost)+'</td></tr>':'')
       +'<tr><td>Incidentals ('+(INCIDENTALS*100)+'% of labor)</td><td>'+money(r.incCost)+'</td></tr>'
       +r.chems.map(c=>'<tr><td>'+c.label+'</td><td>'+money(c.cost)+'</td></tr>').join('')
       +'<tr><td>Equipment fee</td><td>'+money(r.equipCost)+'</td></tr>'
@@ -729,6 +744,7 @@ function applySnapshot(p){
 }
 let saveTimer=null;
 function autosaveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>localSave(false),1200);}
+function resetAll(){clearTimeout(saveTimer);localStorage.removeItem('cwrest_current');location.reload();}
 function localSave(announce){
   localStorage.setItem('cwrest_current',JSON.stringify({ts:Date.now(),payload:snapshot()}));
   if(announce)alert('Saved locally.');
