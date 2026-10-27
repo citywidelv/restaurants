@@ -202,7 +202,7 @@ body{
         </select>
       </div>
       <div class="cfield"><label>Override Margin % (blank = auto by job size)</label>
-        <input type="number" id="ovMargin" placeholder="auto 32-40" style="width:110px" oninput="recalc()">
+        <input type="number" id="ovMargin" placeholder="auto 35-40" style="width:110px" oninput="recalc()">
       </div>
       <div class="cfield"><label>Active Margin</label><div class="marginpill" id="marginPill">auto</div></div>
       <div class="tricnote" id="regionNote"></div>
@@ -287,58 +287,59 @@ function money2(n){return '$'+n.toFixed(2)}
    cross-checked against 2026 market: LV kitchen steward avg $15.69 with Culinary 226 pulling comp toward $28+; Reno cleaners avg $17.31. ---------- */
 /* July 29, 2026 pay policy update: technician wages raised - techs $25+/hr, difficult floor work $30/hr, supervisors default $35/hr (editable per service). */
 const REGIONS={
-  lv:   {label:'Las Vegas',          wage:25.00, mult:1.00, note:'Kitchen-rate labor. The Culinary union pulls experienced kitchen workers toward $28+/hr casino jobs: pay kitchen rates or lose the crew mid-contract. SNHD letter grades make cleanliness a public scoreboard: sell that.'},
-  reno: {label:'Reno / Sparks',      wage:27.00, mult:1.08, note:'Kitchen rate runs $2 over LV and the crew pool is thin. Fewer certified hood subs up north: lock the relationship early, and the markup room is better.'},
-  carson:{label:'Carson City',       wage:27.00, mult:1.08, note:'Same band as Reno. Washoe and Carson health districts inspect differently than SNHD: no letter grade cards, same cleanliness demerits.'},
-  tric: {label:'TRIC / USA Parkway', wage:29.00, mult:1.15, note:'Industrial cafeterias and food production. Badging, deadhead, zero on-corridor crews: hold the premium.'},
-  az:   {label:'Arizona Border',     wage:26.00, mult:1.05, note:'Laughlin and the river towns run casino kitchens too. Thin vendor supply: price like a travel market.'}
+  lv:   {label:'Las Vegas',          wage:20.00, mult:1.00, note:'Kitchen-rate labor. The Culinary union pulls experienced kitchen workers toward $28+/hr casino jobs: pay kitchen rates or lose the crew mid-contract. SNHD letter grades make cleanliness a public scoreboard: sell that.'},
+  reno: {label:'Reno / Sparks',      wage:22.00, mult:1.08, note:'Kitchen rate runs $2 over LV and the crew pool is thin. Fewer certified hood subs up north: lock the relationship early, and the markup room is better.'},
+  carson:{label:'Carson City',       wage:22.00, mult:1.08, note:'Same band as Reno. Washoe and Carson health districts inspect differently than SNHD: no letter grade cards, same cleanliness demerits.'},
+  tric: {label:'TRIC / USA Parkway', wage:23.00, mult:1.15, note:'Industrial cafeterias and food production. Badging, deadhead, zero on-corridor crews: hold the premium.'},
+  az:   {label:'Arizona Border',     wage:20.00, mult:1.05, note:'Laughlin and the river towns run casino kitchens too. Thin vendor supply: price like a travel market.'}
 };
 
-/* ---------- CHEMICALS & SUPPLIES (2026 street prices). perUnit = $ per SF, visit, unit, or system. ---------- */
+/* ---------- CHEMICALS & SUPPLIES. City Wide supplies come from Staples Advantage City Wide Facility Value Items only (prices pulled Oct 27 2026).
+   perUnit = $ per SF, visit, unit, or system. Hood and trap lines are specialist subcontractors, not supplies. ---------- */
 const DEFAULT_CHEMS={
-  degreaser:{name:'Alkaline degreaser concentrate (kitchen dilutions)', pack:'bulk ~$19/gal concentrate', cost:19.00, perUnit:0.015, note:'Deep clean dilutions 1:5. Kitchens burn 3-5x what an office account uses.'},
-  nightlychem:{name:'Nightly chemistry (degreaser mop dilution + FOH supplies)', pack:'allowance', cost:0, perUnit:0.006, note:'Nightly mop-dilution degreaser plus dining supplies. Deep clean chemistry is its own line.'},
-  fohsup:{name:'FOH supplies (neutral cleaner, glass, sanitizer)', pack:'allowance', cost:0, perUnit:0.004},
-  deepsup:{name:'Deep clean chemistry &amp; pads (caustic, doodlebugs, grout brushes)', pack:'allowance', cost:0, perUnit:0.030, note:'Caustic work chews pads and gloves. Budget it honestly.'},
-  boilout:{name:'Fryer boil-out chemical', pack:'~$3/cleaning', cost:3.00, perUnit:3.00},
-  equipsup:{name:'Equipment deep clean chemistry per piece', pack:'allowance', cost:0, perUnit:4.00},
-  ceilingsup:{name:'Ceiling tile cleaning solution', pack:'allowance', cost:0, perUnit:0.05},
+  degreaser:{name:'Diversey Profi Floor Cleaner / Oil &amp; Grease Remover (Staples #323330, model 94512759)', pack:'4 x 128 oz carton, City Wide price $66.09', cost:66.09, perUnit:0.015, note:'Kitchen-strength degreaser concentrate. Kitchens burn 3-5x what an office account uses. City Wide Facility Value Item.'},
+  nightlychem:{name:'Nightly chemistry: Diversey Profi degreaser (Staples #323330) + Glance NA (#24527424) + Clean Quick quat sanitizer (#2070541, $75.93/3 gal)', pack:'allowance, City Wide Value Items', cost:0, perUnit:0.0025, note:'Nightly mop-dilution degreaser plus dining supplies. Deep clean chemistry is its own line.'},
+  fohsup:{name:'FOH supplies: Diversey Stride Citrus neutral (Staples #915237, $34.85/4 gal), Glance NA (#24527424, $22.74), Clean Quick quat sanitizer (#2070541, $75.93/3 gal)', pack:'allowance, City Wide Value Items', cost:0, perUnit:0.004},
+  deepsup:{name:'Deep clean pads and gloves: 3M Doodlebug black pads (Staples #696852, $23.30/10), Ammex nitrile gloves (#24474538, $38.41/1,000); caustic crew supplied', pack:'allowance, City Wide Value Items', cost:0, perUnit:0.030, note:'Caustic work chews pads and gloves. Budget it honestly.'},
+  boilout:{name:'Fryer boil-out chemical (crew supplied: no City Wide Value Item at Staples)', pack:'~$3/cleaning', cost:3.00, perUnit:3.00},
+  equipsup:{name:'Equipment deep clean: Betco Oven and Grill Cleaner (Staples #24620371, $60.48/12) + Diversey Profi (#323330)', pack:'allowance, City Wide Value Items', cost:0, perUnit:4.00},
+  ceilingsup:{name:'Ceiling tile cleaning solution (crew supplied: no City Wide Value Item at Staples)', pack:'allowance', cost:0, perUnit:0.05},
   hoodsub:{name:'Certified hood cleaning sub (per system per visit)', pack:'LV sub market $270-450/system', cost:350.00, perUnit:350.00, note:'IKECA-certified specialist. We manage, we do not self-perform: fire liability sits outside janitorial insurance.'},
   trapsub:{name:'Licensed grease trap pumping sub (per service)', pack:'$150-500 by size', cost:225.00, perUnit:225.00, note:'Licensed haulers only in Nevada. We schedule and mark up; we never pump.'},
-  walkinsup:{name:'Walk-in cleaning supplies per box', pack:'allowance', cost:0, perUnit:6.00},
-  patiowater:{name:'Pressure wash water &amp; supplies', pack:'allowance', cost:0, perUnit:0.003}
+  walkinsup:{name:'Walk-in supplies per box: Diversey Profi (Staples #323330) + Clean Quick quat sanitizer (#2070541)', pack:'allowance, City Wide Value Items', cost:0, perUnit:6.00},
+  patiowater:{name:'Pressure wash water &amp; supplies (utility and crew supplied)', pack:'allowance', cost:0, perUnit:0.003}
 };
 
 /* ---------- SERVICES ---------- */
 const SERVICES=[
  {group:'Layer 1: The Nightly Program'},
  {id:'nightly', name:'Nightly Clean: Dining + Kitchen (per visit)', sub:'FOH detail plus BOH kitchen close-down, priced per visit', ico:'moon',
-  rate:900, equip:4, crew1:false, freqPerWeek:true, chems:['nightlychem'], mkt:[0.05,0.12], floorRate:0.04, minOwn:100,
+  rate:1500, equip:4, crew1:false, freqPerWeek:true, chems:['nightlychem'], mkt:[0.025,0.045], floorRate:0.025, minOwn:75,
   qtyHelp:'Total SF cleaned each visit: dining room + kitchen + restrooms. The blended rate already assumes the kitchen is the slow part. Market check on this line is per SF per VISIT.',
   desc:'The core contract: dining room detail (tables, booths, floors, glass, restrooms) plus the kitchen close-down (line wipe-down, floor degrease and mop, drains, trash). Kitchens clean at 300-600 SF per hour, dining near office speed: the blended rate reflects both. Priced per visit; pick visits per week below and the summary shows the monthly contract.'},
  {group:'Layer 2: Scheduled Deep Cleans'},
  {id:'kitchendeep', name:'Kitchen Deep Clean', sub:'Pull the line, degrease walls to ceiling, behind and under everything', ico:'flame',
-  rate:150, equip:8, crew1:false, chems:['deepsup','degreaser'], mkt:[0.25,0.60], floorRate:0.20, minOwn:300,
+  rate:125, wageAdj:1.15, equip:8, crew1:false, chems:['deepsup','degreaser'], mkt:[0.50,0.90], floorRate:0.70, minOwn:650,
   qtyHelp:'Kitchen SF only (BOH). A 1,200 SF kitchen at typical soil is a 4-person crew for half a night.',
   desc:'The quarterly (or monthly, for high-volume) reset: equipment pulled off the line, walls and ceilings degreased, floor drains opened and scrubbed, quarry tile deck-brushed, behind and under every piece. 100-250 SF per labor-hour: this is the heaviest routine work we sell, and the market prices it $300-800 per session for a reason.'},
  {id:'floorscrub', name:'Kitchen Floor Degrease & Machine Scrub', sub:'Quarry tile deck scrub, the weekly slip-and-fall insurance', ico:'scrub',
-  rate:600, equip:10, crew1:true, freqDefault:12, chems:['degreaser'], mkt:[0.12,0.30], floorRate:0.10, minOwn:150,
+  rate:600, wageAdj:1.15, equip:10, crew1:true, freqDefault:12, chems:['degreaser'], mkt:[0.12,0.30], floorRate:0.15, minOwn:150,
   qtyHelp:'Kitchen and prep floor SF. Weekly or bi-weekly on grease-heavy operations.',
   desc:'Machine scrub with grit brushes and alkaline degreaser, rinse, wet-vac dry. Greasy quarry tile is the classic restaurant slip-and-fall, and residual degreaser film slips too: the rinse pass is part of the job. Sold weekly to monthly at $200-400 a visit.'},
  {id:'equipdeep', name:'Equipment Deep Clean (per piece)', sub:'Ovens, fryers, ranges, broilers, one price per unit', ico:'oven', unit:'pieces',
-  perHr:1.2, equip:5, crew1:true, chems:['equipsup'], mktUnit:[50,100], floorUnit:45,
+  perHr:1.2, wageAdj:1.15, equip:5, crew1:true, chems:['equipsup'], mktUnit:[50,100], floorUnit:65,
   qtyHelp:'Count the pieces on the schedule: oven, fryer, range, broiler, griddle, steamer each count as one.',
   desc:'Per-piece deep cleaning of cooking equipment: interiors, burners, racks, knobs, panels. About 50 minutes a piece with the right chemistry. The market pays $50-100 per unit.'},
  {id:'fryer', name:'Fryer Boil-Outs (per fryer)', sub:'Boil-out service on a schedule the kitchen will not keep themselves', ico:'fryer', unit:'fryers',
-  perHr:2, equip:3, crew1:true, chems:['boilout'], mktUnit:[40,80], floorUnit:35,
+  perHr:2, wageAdj:1.15, equip:3, crew1:true, chems:['boilout'], mktUnit:[40,80], floorUnit:35,
   qtyHelp:'Number of fryer vats per visit.',
   desc:'Drain, boil out with alkaline chemistry, scrub, rinse, neutralize. Kitchens are supposed to do this themselves and mostly do not. A tidy per-vat add-on to any deep clean visit.'},
  {id:'walkin', name:'Walk-In Cooler & Freezer Cleaning', sub:'Racks out, floors, walls, gaskets, fans', ico:'snowflake', unit:'boxes',
-  perHr:0.7, equip:5, crew1:true, chems:['walkinsup'], mktUnit:[100,300], floorUnit:90,
+  perHr:0.7, wageAdj:1.15, equip:5, crew1:true, chems:['walkinsup'], mktUnit:[100,300], floorUnit:150,
   qtyHelp:'Number of walk-in boxes. Freezers take longer than coolers: grade the condition.',
   desc:'Product shifted, racks pulled, floors and walls washed with food-safe chemistry, door gaskets detailed, fan guards dusted. About 1.5 hours a box, more for iced-up freezers. Priced per box.'},
  {id:'ceiling', name:'Ceiling Tile & Vent Cleaning', sub:'Grease-hazed tiles and diffusers over the line and dining room', ico:'grid',
-  rate:120, equip:6, crew1:true, chems:['ceilingsup'], mkt:[0.45,0.65], floorRate:0.40, minOwn:200,
+  rate:120, wageAdj:1.15, equip:6, crew1:true, chems:['ceilingsup'], mkt:[0.45,0.65], floorRate:0.40, minOwn:200,
   qtyHelp:'Ceiling SF being cleaned (usually the kitchen and the first rows of dining).',
   desc:'Kitchen ceilings and diffusers haze with grease and dining ceilings with dust: both read as demerits to an inspector and as neglect to a guest. Cleaned in place at $0.45-0.65 per SF; replacement tiles are a trade referral.'},
  {id:'dining', name:'Dining Room & Bar Detail Day', sub:'Quarterly FOH reset: booths, chairs, woodwork, fixtures, bar', ico:'chair',
@@ -346,7 +347,7 @@ const SERVICES=[
   qtyHelp:'FOH SF for the detail day: dining, bar, host, waiting areas.',
   desc:'The quarterly front-of-house reset: booth seams and undersides, chair legs and rails, woodwork, light fixtures, ledges, bar top and speed rails, window sills. Everything a nightly clean maintains but never resets. Beer line cleaning is a licensed trade: refer it, do not touch it.'},
  {id:'patio', name:'Patio & Entrance Pressure Wash', sub:'Gum, grease drips, and desert dust off the first impression', ico:'surface',
-  rate:900, equip:15, crew1:true, freqDefault:4, chems:['patiowater'], mkt:[0.15,0.35], floorRate:0.12, minOwn:150,
+  rate:900, equip:15, crew1:true, freqDefault:4, chems:['patiowater'], mkt:[0.15,0.35], floorRate:0.20, minOwn:150,
   qtyHelp:'Exterior SF: patio, entry walk, drive-up. Prices in lockstep with the Pressure Washing calculator, hot-water rules included.',
   desc:'Hot-water wash of patios, entries, and the smoking corner, with wash water contained where degreaser runs. Priced in lockstep with the Pressure Washing calculator drive-thru logic.'},
  {group:'Layer 3: Specialist Subs We Manage'},
@@ -359,7 +360,7 @@ const SERVICES=[
   qtyHelp:'Number of pump-outs to schedule. Sub cost per service in the rate book: match it to the hauler quote.',
   desc:'Nevada requires licensed haulers for grease trap pumping, on the 25% rule (pump before grease and solids hit a quarter of capacity). We schedule, verify the manifest, keep the records the district asks for, and mark up the management. Citations run $500-5,000: the paperwork is the product.'},
  {id:'inspection', name:'Health Inspection Rescue Clean', sub:'Demerit-driven emergency deep clean before the re-inspection', ico:'alert', unit:'hours',
-  perHr:1, equip:6, crew1:false, wageAdj:1.15, chems:[], mktUnit:[55,95], floorUnit:50, minOwn:400,
+  perHr:1, equip:6, crew1:false, wageAdj:1.15, chems:[], mktUnit:[55,95], floorUnit:65, minOwn:400,
   qtyHelp:'Crew LABOR HOURS for the rescue. A failed inspection turnaround is typically 16-40 crew-hours against the clock.',
   desc:'The phone call after a bad inspection day: a crew against the re-inspection clock, working the exact demerit list (floors, walls, ceilings, equipment soil, harborage points). Priced hourly at a premium because it is unscheduled, fast, and high-stakes. In Clark County the grade card hangs on the door: this service sells itself.'}
 ];
@@ -369,7 +370,7 @@ const NIGHTLY_FREQS=[[3,'3 nights / week'],[4,'4 nights / week'],[5,'5 nights / 
 
 const SUP_WAGE=35;      /* working supervisor default $/hr, editable on every service */
 const BURDEN=0.15; const INCIDENTALS=0.04; const IC_MARGIN=0.08; const VENDOR_CHEM_MARKUP=0.15; const MIN_PRICE=150;
-function autoMargin(sf){ if(sf<1000)return 40; if(sf<2500)return 38; if(sf<5000)return 36; if(sf<10000)return 34; if(sf<25000)return 33; return 32; }
+function autoMargin(sf){ if(sf<1000)return 40; if(sf<2500)return 38; if(sf<5000)return 36; return 35; }  /* never below 35% (TJ, Oct 2026) */
 
 const ICONS={
  moon:'<svg viewBox="0 0 24 24"><path d="M20 14A8 8 0 1 1 10 4a6.5 6.5 0 0 0 10 10z"/></svg>',
@@ -432,12 +433,15 @@ function priceService(s){
   const flatCost=('flat' in st && st.flat!=='')?(parseFloat(st.flat)||0):(s.flatCost||0);
 
   const chemProvider=$('chemProvider').value;
-  const vendorChems=chemProvider==='vendor'?chemCost*(1+VENDOR_CHEM_MARKUP):0;
-  const cwChems=chemProvider==='cw'?chemCost:0;
+  /* hood and grease trap specialists are their own vendors: their price carries City Wide margin only, never the crew's markups */
+  const subCost=chems.filter(c=>c.isSub).reduce((a,c)=>a+c.cost,0);
+  const supplyOnly=chemCost-subCost;
+  const vendorChems=chemProvider==='vendor'?supplyOnly*(1+VENDOR_CHEM_MARKUP):0;
+  const cwChems=chemProvider==='cw'?supplyOnly:0;
   const vendorBase=laborCost+incCost+equipCost+flatCost+vendorChems;
   const inhouse=($('laborBy')&&$('laborBy').value==='inhouse');
   const vendorCost=inhouse?vendorBase:vendorBase/(1-IC_MARGIN);
-  const totalCost=vendorCost+cwChems;
+  const totalCost=vendorCost+cwChems+subCost;
 
   const ov=parseFloat($('ovMargin').value);
   const svcOv=parseFloat(st.margin);
@@ -493,7 +497,7 @@ function renderServices(){
       +'<div class="field"><label>Crew Wage $/hr (kitchen rate)</label><input type="number" step="0.5" value="'+(st.wage||'')+'" placeholder="'+(REGIONS[$('region').value].wage*(s.wageAdj||1)).toFixed(2)+'" onchange="setSvc(\''+s.id+'\',\'wage\',this.value)"><small>Kitchen work pays above office janitorial. Underpay and the casino stewarding jobs take your crew.</small></div>'
       +'<div class="field"><label>Equipment $/hr</label><input type="number" step="1" value="'+(st.equip||'')+'" placeholder="'+s.equip+'" onchange="setSvc(\''+s.id+'\',\'equip\',this.value)"></div>'
       +'<div class="field"><label>'+(s.unit?'Price per '+s.unit.replace(/s$/,'')+' Override':'Rate/SF Override')+'</label><input type="number" step="0.01" value="'+(st.rateOv||'')+'" placeholder="auto build-up" onchange="setSvc(\''+s.id+'\',\'rateOv\',this.value)"><small>Bypasses the build-up when you hold a firm sub quote or account history.</small></div>'
-      +'<div class="field"><label>Service Margin % Override</label><input type="number" value="'+(st.margin||'')+'" placeholder="auto '+(s.unit?36:(st.sf?autoMargin(parseFloat(st.sf)||0):'32-40'))+'" onchange="setSvc(\''+s.id+'\',\'margin\',this.value)"></div>'
+      +'<div class="field"><label>Service Margin % Override</label><input type="number" value="'+(st.margin||'')+'" placeholder="auto '+(s.unit?36:(st.sf?autoMargin(parseFloat(st.sf)||0):'35-40'))+'" onchange="setSvc(\''+s.id+'\',\'margin\',this.value)"></div>'
       +'</div>';
       if(r){
         const uw=s.unit?('/'+s.unit.replace(/s$/,'')):'/SF';
@@ -593,8 +597,8 @@ function recalc(){
   $('minMsg').textContent=minMsg;
   const ov=parseFloat($('ovMargin').value);
   const shown=(!isNaN(ov)&&ov>0)?ov:(results.length?Math.round(results.reduce((a,r)=>a+r.margin,0)/results.length):null);
-  $('marginPill').textContent=shown?shown+'%'+((!isNaN(ov)&&ov>0)?' override':' auto by size'):'32-40% auto';
-  $('marginPill').className='marginpill'+(shown&&shown<32?' hot':'');
+  $('marginPill').textContent=shown?shown+'%'+((!isNaN(ov)&&ov>0)?' override':' auto by size'):'35-40% auto';
+  $('marginPill').className='marginpill'+(shown&&shown<35?' hot':'');
 }
 /* ---------- EDUCATION TABS ---------- */
 function renderFloors(){
@@ -644,7 +648,7 @@ function renderProcess(){
   +'<li><b>Grease trap: licensed haulers only.</b> Our value is the schedule, the manifest file, and the client never thinking about it.</li>'
   +'<li><b>Red flags:</b> office-only references, no PPE story for caustics, "we can do the hoods too" without IKECA papers, and anyone who quotes a kitchen without walking it.</li></ul>'
   +'<h2>Pricing It Effectively</h2>'
-  +'<ul><li>Rate factors match the Bid Calculator: 15% burden, 4% incidentals, crew keeps 8% of their check, City Wide margin 32-40% by size.</li>'
+  +'<ul><li>Rate factors match the Bid Calculator: 15% burden, 4% incidentals, crew keeps 8% of their check, City Wide margin 35-40% by size.</li>'
   +'<li>Kitchen chemical is a real cost line: 3-6% of revenue on heavy-grease accounts. The build-up carries it; do not discount it away.</li>'
   +'<li>The whole-account monthly number closes deals: nightly + deep cleans + managed subs on one invoice beats three vendors and a forgotten hood sticker.</li>'
   +'<li>Multi-unit operators expect ~15-18% consolidation pricing: give it on the nightly layer, hold the deep clean and sub-management lines.</li>'
@@ -678,7 +682,7 @@ function renderRates(){
   +'<tr><td>Payroll burden</td><td>'+(BURDEN*100)+'%</td><td>On top of raw wages.</td></tr>'
   +'<tr><td>Incidentals &amp; unlisted supplies</td><td>'+(INCIDENTALS*100)+'% of labor</td><td>Room for what nobody itemized.</td></tr>'
   +'<tr><td>Crew company margin</td><td>'+(IC_MARGIN*100)+'%</td><td>Margin basis, cost divided by 0.92, exactly the Bid Calculator IC line.</td></tr>'
-  +'<tr><td>City Wide margin</td><td>32-40%</td><td>Auto by job size. Sub-managed lines default 36%.</td></tr>'
+  +'<tr><td>City Wide margin</td><td>35-40%</td><td>Auto by job size. Sub-managed lines default 36%.</td></tr>'
   +'<tr><td>Minimums</td><td>$100 nightly visit, $150 dispatched crew, $300 deep clean, $350 hood, $400 rescue</td><td>Lead service only on multi-service visits.</td></tr>'
   +'<tr><td>Crew-provided chemical markup</td><td>'+(VENDOR_CHEM_MARKUP*100)+'%</td><td>Their procurement cost.</td></tr></table>'
   +'<h2>Stays Cohesive with the Other Calculators</h2>'
